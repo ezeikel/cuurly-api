@@ -13,8 +13,8 @@ type Post {
   caption: String
   content: Content!
   author: User!
-  likes: [Like!]!
-  comments: [Comment!]!
+  likes: [Like!]! @default(value: [])
+  comments: [Comment!]! @default(value: [])
   createdAt: Date!
 }
 
@@ -28,18 +28,23 @@ type User {
   email: String!
   phoneNumber: String
   gender: Gender!
-  following: [User!]!
-  followers: [User!]!
+  following: [User!]! @default(value: [])
+  followers: [User!]! @default(value: [])
   verified: Boolean!
-  posts: [Post!]!
-  likes: [Like!]!
-  comments: [Comment!]!
+  posts: [Post!]! @default(value: [])
+  likes: [Like!]! @default(value: [])
+  comments: [Comment!]! @default(value: [])
   permissions: [Permission!]!
 }
 
 type Query {
   currentUser: User
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, first: Int ): [User!]!
+  users(
+    where: UserWhereInput
+    orderBy: UserOrderByInput
+    skip: Int
+    first: Int
+  ): [User!]!
   userz: [User!]! # Just for testing
   user(id: ID!): User
   following(id: ID!): [User!]!
@@ -54,11 +59,20 @@ type Query {
 }
 
 type Mutation {
-  signup(name: String!, username: String!, email: String!, password: String!): User!
+  signup(
+    name: String!
+    username: String!
+    email: String!
+    password: String!
+  ): User!
   signin(username: String!, password: String!): User!
   signout: SuccessMessage
   requestReset(email: String!): SuccessMessage
-  resetPassword(resetToken: String!, password: String!, confirmPassword: String!): User!
+  resetPassword(
+    resetToken: String!
+    password: String!
+    confirmPassword: String!
+  ): User!
   follow(id: ID!): User!
   unfollow(id: ID!): User!
   createPost(file: Upload!, caption: String): Post!
@@ -69,5 +83,16 @@ type Mutation {
   unlikePost(id: ID!): Like!
   addComment(id: ID!, text: String!): Comment!
   deleteComment(id: ID!): Comment!
-  updateUser(name: String, username: String, profilePicture: Upload, website: String, bio: String, email: String, phoneNumber: String, gender: String, oldPassword: String, password: String): User!
+  updateUser(
+    name: String
+    username: String
+    profilePicture: Upload
+    website: String
+    bio: String
+    email: String
+    phoneNumber: String
+    gender: String
+    oldPassword: String
+    password: String
+  ): User!
 }
