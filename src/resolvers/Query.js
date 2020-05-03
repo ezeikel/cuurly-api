@@ -1,23 +1,16 @@
 const { isLoggedIn, hasPermission } = require("../utils");
 
 const Query = {
-  currentUser: async (_, args, ctx, info) => {
-    console.log("currentUser CALLED");
+  currentUser: (_, args, ctx, info) => {
     if (!ctx.request.userId) {
-      console.log("No userId on request..");
       return null;
     }
-
-    console.log("Found a user...");
-    const user = await ctx.prisma.user(
+    return ctx.prisma.user(
       {
         id: ctx.request.userId,
       },
       info
     );
-
-    console.log({ user });
-    return user;
   },
   users: (_, { where }, ctx, info) => {
     isLoggedIn(ctx);

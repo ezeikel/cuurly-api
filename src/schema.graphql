@@ -13,8 +13,8 @@ type Post {
   caption: String
   content: Content!
   author: User!
-  likes: [Like!]! @default(value: [])
-  comments: [Comment!]! @default(value: [])
+  likes: [Like!]!
+  comments: [Comment!]!
   createdAt: Date!
 }
 
@@ -28,12 +28,12 @@ type User {
   email: String!
   phoneNumber: String
   gender: Gender!
-  following: [User!]! @default(value: [])
-  followers: [User!]! @default(value: [])
+  following: [User!]!
+  followers: [User!]!
   verified: Boolean!
-  posts: [Post!]! @default(value: [])
-  likes: [Like!]! @default(value: [])
-  comments: [Comment!]! @default(value: [])
+  posts: [Post!]!
+  likes: [Like!]!
+  comments: [Comment!]!
   permissions: [Permission!]!
 }
 
