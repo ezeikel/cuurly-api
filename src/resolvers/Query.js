@@ -21,12 +21,13 @@ const Query = {
 
     return ctx.prisma.users({ where }, info);
   },
-  user: async (_, { id }, ctx, info) => ctx.prisma.user({ id }, info),
+  user: (_, { id, username, email }, ctx, info) =>
+    ctx.prisma.user({ id, username, email }, info),
   userz: (_, args, ctx, info) => ctx.prisma.users({}, info),
-  following: (_, { id }, ctx, info) =>
-    ctx.prisma.user({ id }, info).following(),
-  followers: (_, { id }, ctx, info) =>
-    ctx.prisma.user({ id }, info).followers(),
+  following: (_, { id, username, email }, ctx, info) =>
+    ctx.prisma.user({ id, username, email }, info).following(),
+  followers: (_, { id, username, email }, ctx, info) =>
+    ctx.prisma.user({ id, username, email }, info).followers(),
   posts: (_, args, ctx, info) => ctx.prisma.posts({}, info),
   post: (_, { id }, ctx, info) => ctx.prisma.post({ id }, info),
   feed: async (_, { id }, ctx, info) => {

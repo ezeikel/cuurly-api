@@ -46,9 +46,9 @@ type Query {
     first: Int
   ): [User!]!
   userz: [User!]! # Just for testing
-  user(id: ID!): User
-  following(id: ID!): [User!]!
-  followers(id: ID!): [User!]!
+  user(id: ID, username: String, email: String): User # TODO: Find a way to make it that you have to pass one of these
+  following(id: ID, username: String, email: String): [User!]!
+  followers(id: ID, username: String, email: String): [User!]!
   profilePicture: Content
   posts: [Post!]!
   post(id: ID!): Post
