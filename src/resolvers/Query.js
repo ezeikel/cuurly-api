@@ -37,10 +37,11 @@ const Query = {
     return ctx.prisma.posts(
       {
         where: {
-          author: { id_in: [...followingIds, ctx.request.userId] },
+          // author: { id_in: [...followingIds, ctx.request.userId] },
+          author: { id_in: [...followingIds, "5c8e5fb424aa9a000767c6c0"] },
         },
-        orderBy: "createdAt_ASC", // TODO: orderBy doesnt seem to work when combined with where - https://github.com/prisma/issues/?
-      }, // seems to be in most recent order anyway
+        orderBy: "createdAt_DESC",
+      },
       info
     );
   },
@@ -53,8 +54,8 @@ const Query = {
         where: {
           author: { id_not_in: [...followingIds, ctx.request.userId] },
         },
-        orderBy: "createdAt_DESC", // TODO: orderBy doesnt seem to work when combined with where - https://github.com/prisma/issues/?
-      }, // seems to be in most recent order anyway
+        orderBy: "createdAt_DESC",
+      },
       info
     );
   },
@@ -64,8 +65,8 @@ const Query = {
         where: {
           likes_every: { id: id },
         },
-        orderBy: "createdAt_DESC", // TODO: orderBy doesnt seem to work when combined with where - https://github.com/prisma/issues/?
-      }, // seems to be in most recent order anyway
+        orderBy: "createdAt_DESC", // TODO: This should be ordered by WHEN liked not when liked post was created
+      },
       info
     );
   },

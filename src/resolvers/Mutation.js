@@ -292,7 +292,7 @@ const Mutations = {
     isLoggedIn(ctx);
 
     const tags = ["user_post"];
-    const folder = `uploads/users/${ctx.request.userId}`;
+    const folder = `users/${ctx.request.userId}/uploads`;
     const { resultSecureUrl, publicId } = await processUpload({
       file,
       tags,
@@ -409,7 +409,7 @@ const Mutations = {
 
     if (profilePicture) {
       const tags = ["user_profile_picture"];
-      const folder = `profilePictures/users/${ctx.request.userId}`;
+      const folder = `users/${ctx.request.userId}/profilePicture`;
 
       const { resultSecureUrl, publicId } = await processUpload({
         file: profilePicture,
