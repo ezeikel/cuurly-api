@@ -37,8 +37,7 @@ const Query = {
     return ctx.prisma.posts(
       {
         where: {
-          // author: { id_in: [...followingIds, ctx.request.userId] },
-          author: { id_in: [...followingIds, "5c8e5fb424aa9a000767c6c0"] },
+          author: { id_in: [...followingIds, ctx.request.userId] },
         },
         orderBy: "createdAt_DESC",
       },
