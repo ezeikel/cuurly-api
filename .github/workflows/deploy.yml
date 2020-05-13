@@ -17,4 +17,4 @@ jobs:
             sh deploy.sh
           host: ${{ secrets.HOST }}
           user: ezeikel
-          pass: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.PUBLIC_KEY }}
