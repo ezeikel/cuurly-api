@@ -11,10 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: deploy via ssh
-        uses: fifsky/ssh-action@v0.0.4
+        uses: appleboy/ssh-action@master
         with:
-          command: |
-            sh deploy.sh
           host: ${{ secrets.HOST }}
-          user: ezeikel
+          username: ezeikel
           key: ${{ secrets.PRIVATE_KEY }}
+          script: whoami
