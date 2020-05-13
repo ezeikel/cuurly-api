@@ -17,4 +17,3 @@ jobs:
           username: ezeikel
           key: ${{ secrets.PRIVATE_KEY }}
           script: whoami
-          debug: true
