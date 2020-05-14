@@ -16,6 +16,4 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
-          script: | 
-            sh deploy.sh
-            pm2 restart crownd-api/src/index.js
+          script: sh deploy.sh
