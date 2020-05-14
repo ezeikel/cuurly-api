@@ -14,6 +14,6 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          username: ezeikel
+          username: root
           key: ${{ secrets.PRIVATE_KEY }}
           script: whoami
