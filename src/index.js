@@ -38,12 +38,21 @@ server.express.use(async (req, res, next) => {
   next();
 });
 
+// FIX: enables cors - https://stackoverflow.com/questions/53792064/cors-blocks-mutation-in-graphql-yoga
+server.express.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
 server.start(
   {
     cors: {
       credentials: true,
-      methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-      origin: ["http://localhost:3001", "https://crownd.app"],
+      origin: process.env.FRONTEND_URL,
     },
     port: process.env.PORT,
   },
