@@ -1,7 +1,7 @@
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const createServer = require('./createServer');
-require('dotenv').config();
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const createServer = require("./createServer");
+require("dotenv").config();
 
 const server = createServer();
 
@@ -27,21 +27,29 @@ server.express.use(async (req, res, next) => {
     return next();
   }
 
-  const user = await server.context()
-    .prisma.user({
-      id: req.userId
-    }, '{ id, permissions, email, name }');
+  const user = await server.context().prisma.user(
+    {
+      id: req.userId,
+    },
+    "{ id, permissions, email, name }"
+  );
 
   req.user = user;
   next();
 });
 
-server.start({
-  cors: {
-    credentials: true,
-    origin: process.env.FRONTEND_URL
+server.start(
+  {
+    cors: {
+      credentials: true,
+      methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+      origin: ["http://localhost:3001", "https://crownd.app"],
+    },
+    port: process.env.PORT,
   },
-  port: process.env.PORT
-}, ({ port }) => {
-  console.log(`Server started, listening on  http://localhost:${port} for incoming requests.`,)
-});
+  ({ port }) => {
+    console.log(
+      `Server started, listening on  http://localhost:${port} for incoming requests.`
+    );
+  }
+);
