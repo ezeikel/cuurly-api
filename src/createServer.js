@@ -1,20 +1,35 @@
-const { GraphQLScalarType } = require('graphql');
-const { Kind } = require('graphql/language');
-const { GraphQLServer } = require('graphql-yoga');
-const { prisma } = require('./generated/prisma-client');
-const Mutation = require('./resolvers/Mutation');
-const Query = require('./resolvers/Query');
+const { GraphQLScalarType } = require("graphql");
+const { Kind } = require("graphql/language");
+const { GraphQLServer } = require("graphql-yoga");
+const { ApolloServer } = require("apollo-server-express");
+const { importSchema } = require("graphql-import");
+const { prisma } = require("./generated/prisma-client");
+const Mutation = require("./resolvers/Mutation");
+const Query = require("./resolvers/Query");
+
+// Apollo Server
+
+const typeDefs = importSchema("./src/schema.graphql");
+
+return new ApolloServer({
+  typeDefs,
+  resolvers,
+  introspection: true,
+  playground: true,
+  context: (req) => ({ ...req, prisma }),
+});
 
 // Create the GraphQL Yoga Server
 function createServer() {
   return new GraphQLServer({
-    typeDefs: 'src/schema.graphql',
+    typeDefs: "src/schema.graphql",
     resolvers: {
       Mutation,
       Query,
-      Date: new GraphQLScalarType({ // https://www.apollographql.com/docs/apollo-server/features/scalars-enums.html#custom-scalars
-        name: 'Date',
-        description: 'Date custom scalar type',
+      Date: new GraphQLScalarType({
+        // https://www.apollographql.com/docs/apollo-server/features/scalars-enums.html#custom-scalars
+        name: "Date",
+        description: "Date custom scalar type",
         parseValue(value) {
           return new Date(value); // value from the client
         },
@@ -29,31 +44,32 @@ function createServer() {
         },
       }),
       User: {
-        posts: parent => prisma.user({ id: parent.id }).posts(),
-        following: parent => prisma.user({ id: parent.id }).following(),
-        followers: parent => prisma.user({ id: parent.id }).followers(),
-        likes: parent => prisma.user({ id: parent.id }).likes(),
-        comments: parent => prisma.user({ id: parent.id }).comments(),
-        profilePicture: parent => prisma.user({ id: parent.id }).profilePicture()
+        posts: (parent) => prisma.user({ id: parent.id }).posts(),
+        following: (parent) => prisma.user({ id: parent.id }).following(),
+        followers: (parent) => prisma.user({ id: parent.id }).followers(),
+        likes: (parent) => prisma.user({ id: parent.id }).likes(),
+        comments: (parent) => prisma.user({ id: parent.id }).comments(),
+        profilePicture: (parent) =>
+          prisma.user({ id: parent.id }).profilePicture(),
       },
       Post: {
-        author: parent => prisma.post({ id: parent.id }).author(),
-        likes: parent => prisma.post({ id: parent.id }).likes(),
-        comments: parent => prisma.post({ id: parent.id }).comments(),
-        content: parent => prisma.post({ id: parent.id }).content()
+        author: (parent) => prisma.post({ id: parent.id }).author(),
+        likes: (parent) => prisma.post({ id: parent.id }).likes(),
+        comments: (parent) => prisma.post({ id: parent.id }).comments(),
+        content: (parent) => prisma.post({ id: parent.id }).content(),
       },
       Like: {
-        user: parent => prisma.like({ id: parent.id }).user(),
-        post: parent => prisma.like({ id: parent.id }).post()
+        user: (parent) => prisma.like({ id: parent.id }).user(),
+        post: (parent) => prisma.like({ id: parent.id }).post(),
       },
       Comment: {
-        writtenBy: parent => prisma.comment({ id: parent.id }).writtenBy()
-      }
+        writtenBy: (parent) => prisma.comment({ id: parent.id }).writtenBy(),
+      },
     },
     resolverValidationOptions: {
-      requireResolversForResolveType: false
+      requireResolversForResolveType: false,
     },
-    context: req => ({ ...req, prisma})
+    context: (req) => ({ ...req, prisma }),
   });
 }
 
