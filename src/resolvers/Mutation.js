@@ -86,7 +86,7 @@ const Mutations = {
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
 
     // we set the jwt as a cookie on the response
-    ctx.response.cookie("token", token, {
+    ctx.res.cookie("token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
     });
@@ -113,7 +113,7 @@ const Mutations = {
     // 3. generate the jwt token
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
     // 4. set the cookie with the token
-    ctx.response.cookie("token", token, {
+    ctx.res.cookie("token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365,
     });
@@ -121,7 +121,7 @@ const Mutations = {
     return user;
   },
   signout: (_, args, ctx, info) => {
-    ctx.response.clearCookie("token");
+    ctx.res.clearCookie("token");
     return { message: "Goodbye!" };
   },
   requestReset: async (_, { email }, ctx, info) => {
@@ -216,7 +216,7 @@ const Mutations = {
     const token = jwt.sign({ userId: updatedUser.id }, process.env.APP_SECRET);
 
     // we set the jwt as a cookie on the response
-    ctx.response.cookie("token", token, {
+    ctx.res.cookie("token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
     });
@@ -230,7 +230,7 @@ const Mutations = {
     const followers = await ctx.prisma.user({ id }, info).followers();
     const followerIds = followers.map((follower) => follower.id);
 
-    if (followerIds.includes(ctx.request.userId)) {
+    if (followerIds.includes(ctx.req.userId)) {
       throw new Error(`You are already following ${id}`);
     }
 
@@ -240,14 +240,14 @@ const Mutations = {
       },
       data: {
         followers: {
-          connect: { id: ctx.request.userId },
+          connect: { id: ctx.req.userId },
         },
       },
     });
 
     return ctx.prisma.updateUser({
       where: {
-        id: ctx.request.userId,
+        id: ctx.req.userId,
       },
       data: {
         following: {
@@ -262,7 +262,7 @@ const Mutations = {
     const followers = await ctx.prisma.user({ id }, info).followers();
     const followerIds = followers.map((follower) => follower.id);
 
-    if (!followerIds.includes(ctx.request.userId)) {
+    if (!followerIds.includes(ctx.req.userId)) {
       throw new Error(`You are not following ${id}`);
     }
 
@@ -272,14 +272,14 @@ const Mutations = {
       },
       data: {
         followers: {
-          disconnect: { id: ctx.request.userId },
+          disconnect: { id: ctx.req.userId },
         },
       },
     });
 
     return ctx.prisma.updateUser({
       where: {
-        id: ctx.request.userId,
+        id: ctx.req.userId,
       },
       data: {
         following: {
@@ -292,7 +292,7 @@ const Mutations = {
     isLoggedIn(ctx);
 
     const tags = ["user_post"];
-    const folder = `users/${ctx.request.userId}/uploads`;
+    const folder = `users/${ctx.req.userId}/uploads`;
     const { resultSecureUrl, publicId } = await processUpload({
       file,
       tags,
@@ -303,7 +303,7 @@ const Mutations = {
       {
         author: {
           connect: {
-            id: ctx.request.userId,
+            id: ctx.req.userId,
           },
         },
         content: {
@@ -349,7 +349,7 @@ const Mutations = {
       {
         user: {
           connect: {
-            id: ctx.request.userId,
+            id: ctx.req.userId,
           },
         },
         post: {
@@ -378,7 +378,7 @@ const Mutations = {
       text,
       writtenBy: {
         connect: {
-          id: ctx.request.userId,
+          id: ctx.req.userId,
         },
       },
     });
@@ -409,7 +409,7 @@ const Mutations = {
 
     if (profilePicture) {
       const tags = ["user_profile_picture"];
-      const folder = `users/${ctx.request.userId}/profilePicture`;
+      const folder = `users/${ctx.req.userId}/profilePicture`;
 
       const { resultSecureUrl, publicId } = await processUpload({
         file: profilePicture,
@@ -424,7 +424,7 @@ const Mutations = {
     }
 
     if (password) {
-      const user = await ctx.prisma.user({ id: ctx.request.userId });
+      const user = await ctx.prisma.user({ id: ctx.req.userId });
       const valid = await bcrypt.compare(oldPassword, user.password);
 
       if (!valid) {
@@ -437,7 +437,7 @@ const Mutations = {
     return ctx.prisma.updateUser(
       {
         where: {
-          id: ctx.request.userId,
+          id: ctx.req.userId,
         },
         data: {
           name,

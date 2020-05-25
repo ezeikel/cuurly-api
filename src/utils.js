@@ -14,7 +14,7 @@ function hasPermission(user, permissionsNeeded) {
 }
 
 function isLoggedIn(ctx) {
-  if (!ctx.request.userId) {
+  if (!ctx.req.userId) {
     throw new Error('You must be logged in to do that.');
   }
 }

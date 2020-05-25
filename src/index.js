@@ -1,14 +1,36 @@
+  
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-const createServer = require("./createServer");
+const { ApolloServer } = require("apollo-server-express");
+const { prisma } = require("./generated/prisma-client");
+const Mutation = require("./resolvers/Mutation");
+const Query = require("./resolvers/Query");
+const Custom = require("./resolvers/Custom");
+const { importSchema } = require("graphql-import");
 require("dotenv").config();
 
-const server = createServer();
+const app = express();
 
-server.express.use(cookieParser());
+// enable cors
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+// log all requests to the console
+if (process.env.SILENCE_LOGS !== "true") {
+  app.use(morgan("dev"));
+}
+
+app.use(cookieParser());
 
 // decode the JWT so we can get the userId on each request
-server.express.use((req, res, next) => {
+app.use((req, res, next) => {
   const { token } = req.cookies;
 
   if (token) {
@@ -19,9 +41,8 @@ server.express.use((req, res, next) => {
   next();
 });
 
-// create a middleware that populates user on each request
-
-server.express.use(async (req, res, next) => {
+// get User from their id
+app.use(async (req, res, next) => {
   // if they arent logged in, skip this
   if (!req.userId) {
     return next();
@@ -38,27 +59,28 @@ server.express.use(async (req, res, next) => {
   next();
 });
 
-// FIX: enables cors - https://stackoverflow.com/questions/53792064/cors-blocks-mutation-in-graphql-yoga
-server.express.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
+
+const typeDefs = importSchema("./src/schema.graphql");
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers: {
+    Mutation,
+    Query,
+    ...Custom,
+  },
+  introspection: true,
+  playground: true,
+  context: (req) => ({ ...req, prisma }),
 });
 
-server.start(
-  {
-    cors: {
-      credentials: true,
-      origin: process.env.FRONTEND_URL,
-    },
-    port: process.env.PORT,
-  },
-  ({ port }) => {
-    console.log(
-      `Server started, listening on  http://localhost:${port} for incoming requests.`
-    );
-  }
-);
+// TODO: turn cors om properly using middleware above
+// graphQL endpoint
+server.applyMiddleware({ app, path: "/graphql", cors: false });
+
+app.listen({ port: process.env.PORT }, () => {
+  console.log(`🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`)
+});
+
+module.exports = app
+
