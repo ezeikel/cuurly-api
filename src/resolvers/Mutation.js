@@ -14,7 +14,7 @@ cloudinary.config({
 });
 
 const processUpload = async ({ file, folder, tags }) => {
-  const { createStream, filename, mimetype, encoding } = await file; // FIX: migrated to new api - https://github.com/apollographql/apollo-server/issues/2105
+  const { createReadStream, filename, mimetype, encoding } = await file; // FIX: migrated to new api - https://github.com/apollographql/apollo-server/issues/2105
 
   const stream = createReadStream();
 
