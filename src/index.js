@@ -1,4 +1,3 @@
-  
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -11,6 +10,15 @@ const Query = require("./resolvers/Query");
 const Custom = require("./resolvers/Custom");
 const { importSchema } = require("graphql-import");
 require("dotenv").config();
+const Sentry = require("@sentry/node");
+
+Sentry.init({
+  environment: process.NODE_ENV,
+  dsn:
+    "https://d9fee5a77a6a4e6ca633668d5dd849dc@o358156.ingest.sentry.io/5257206",
+});
+
+myUndefinedFunction();
 
 const app = express();
 
@@ -59,7 +67,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-
 const typeDefs = importSchema("./src/schema.graphql");
 
 const server = new ApolloServer({
@@ -79,8 +86,11 @@ const server = new ApolloServer({
 server.applyMiddleware({ app, path: "/graphql", cors: false });
 
 app.listen({ port: process.env.PORT }, () => {
-  console.log(`🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`)
+  console.log(
+    `🚀 Server ready at http://localhost:${process.env.PORT}${
+      server.graphqlPath
+    }`
+  );
 });
 
-module.exports = app
-
+module.exports = app;

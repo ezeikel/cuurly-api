@@ -6,6 +6,7 @@ const { transport, makeNiceEmail } = require("../mail");
 const cloudinary = require("cloudinary");
 const { isLoggedIn } = require("../utils");
 
+// TODO: remove hardcoded values and read from .env instead
 cloudinary.config({
   cloud_name: "crownd",
   api_key: "587685821236624",
@@ -290,6 +291,8 @@ const Mutations = {
   },
   createPost: async (_, { file, caption }, ctx, info) => {
     isLoggedIn(ctx);
+
+    console.log({ file, caption });
 
     const tags = ["user_post"];
     const folder = `users/${ctx.req.userId}/uploads`;
