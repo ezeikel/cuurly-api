@@ -18,8 +18,6 @@ Sentry.init({
     "https://d9fee5a77a6a4e6ca633668d5dd849dc@o358156.ingest.sentry.io/5257206",
 });
 
-myUndefinedFunction();
-
 const app = express();
 
 // enable cors
