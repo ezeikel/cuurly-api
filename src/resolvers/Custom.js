@@ -21,7 +21,8 @@ const Custom = {
     },
   }),
   User: {
-    posts: (parent) => prisma.user({ id: parent.id }).posts(),
+    posts: (parent) =>
+      prisma.user({ id: parent.id }).posts({ orderBy: "createdAt_DESC" }),
     following: (parent) => prisma.user({ id: parent.id }).following(),
     followers: (parent) => prisma.user({ id: parent.id }).followers(),
     likes: (parent) => prisma.user({ id: parent.id }).likes(),

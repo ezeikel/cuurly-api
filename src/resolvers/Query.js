@@ -21,7 +21,7 @@ const Query = {
 
     return ctx.prisma.users({ where }, info);
   },
-  user: (_, { id, username, email }, ctx, info) =>
+  user: async (_, { id, username, email }, ctx, info) =>
     ctx.prisma.user({ id, username, email }, info),
   userz: (_, args, ctx, info) => ctx.prisma.users({}, info),
   following: (_, { id, username, email }, ctx, info) =>
