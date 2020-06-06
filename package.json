@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@sentry/node": "5.15.5",
-    "apollo-server-express": "^2.13.1",
+    "apollo-server-express": "^2.14.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.21.0",
     "cookie-parser": "^1.4.5",
