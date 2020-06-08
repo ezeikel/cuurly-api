@@ -294,8 +294,6 @@ const Mutations = {
   createPost: async (_, { file, caption }, ctx, info) => {
     isLoggedIn(ctx);
 
-    console.log({ file, caption });
-
     const tags = ["user_post"];
     const folder = `users/${ctx.req.userId}/uploads`;
     const { resultSecureUrl, publicId } = await processUpload({
