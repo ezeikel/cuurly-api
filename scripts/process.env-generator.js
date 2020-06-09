@@ -24,7 +24,7 @@ keys.forEach((key) => {
   if (typeof val === "string") {
     val = `"${val}"`;
   }
-  contents += `\n${key} = ${val}`;
+  contents += `\n${key}=${val}`;
 });
 
 writeFile("./.env", contents, (err) => {
