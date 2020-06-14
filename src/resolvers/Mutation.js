@@ -14,18 +14,19 @@ cloudinary.config({
 });
 
 const processUpload = async ({ file, folder, tags }) => {
-  const { createReadStream, filename, mimetype, encoding } = await file; // FIX: migrated to new api - https://github.com/apollographql/apollo-server/issues/2105
+  const { createReadStream, fileType } = file;
 
   const stream = createReadStream();
 
   let resultUrl = "",
     resultSecureUrl = "",
     publicId = "";
+
   const cloudinaryUpload = async ({ stream }) => {
-    try {
-      await new Promise((resolve, reject) => {
-        const streamLoad = cloudinary.v2.uploader.upload_stream(
-          {
+    // TODO: proper conditioning needed here
+    const uploadConfig =
+      fileType === "image"
+        ? {
             folder,
             tags,
             overwrite: true,
@@ -35,7 +36,18 @@ const processUpload = async ({ file, folder, tags }) => {
               //aspect_ratio: '4:5',
               format: "jpg",
             },
-          },
+          }
+        : {
+            resource_type: "video",
+            folder,
+            tags,
+            overwrite: true,
+          };
+
+    try {
+      await new Promise((resolve, reject) => {
+        const streamLoad = cloudinary.v2.uploader.upload_stream(
+          uploadConfig,
           function(error, result) {
             if (result) {
               console.log({ result });
@@ -52,7 +64,7 @@ const processUpload = async ({ file, folder, tags }) => {
         stream.pipe(streamLoad);
       });
     } catch (err) {
-      throw new Error(`Failed to upload profile picture ! Err:${err.message}`);
+      throw new Error(`Failed to upload file! Err:${err.message}`);
     }
   };
 
@@ -293,11 +305,24 @@ const Mutations = {
   },
   createPost: async (_, { file, caption }, ctx, info) => {
     isLoggedIn(ctx);
+    let fileType;
+
+    const { createReadStream, mimetype } = await file;
+
+    switch (mimetype) {
+      case "image/png":
+      case "image/jpg":
+        fileType = "image";
+        break;
+      case "video/mp4":
+        fileType = "video";
+        break;
+    }
 
     const tags = ["user_post"];
-    const folder = `users/${ctx.req.userId}/uploads`;
+    const folder = `users/${ctx.req.userId}/uploads/${fileType}s`;
     const { resultSecureUrl, publicId } = await processUpload({
-      file,
+      file: { createReadStream, fileType },
       tags,
       folder,
     });
@@ -311,6 +336,7 @@ const Mutations = {
         },
         content: {
           create: {
+            type: fileType.toUpperCase(),
             url: resultSecureUrl,
             publicId,
           },
@@ -337,6 +363,7 @@ const Mutations = {
     });
 
     // TODO: promisify this
+    // BUG: deleting video doesnt seem to work properly. Deleted from db but not from cloudinary
     cloudinary.v2.api.delete_resources([publicId], (error, result) => {
       if (error) console.log({ error });
     });
@@ -412,10 +439,12 @@ const Mutations = {
 
     if (profilePicture) {
       const tags = ["user_profile_picture"];
-      const folder = `users/${ctx.req.userId}/profilePicture`;
+      const folder = `users/${ctx.req.userId}/uploads/images`;
+
+      const { createReadStream } = await profilePicture;
 
       const { resultSecureUrl, publicId } = await processUpload({
-        file: profilePicture,
+        file: { createReadStream, fileType: "image" },
         tags,
         folder,
       });
