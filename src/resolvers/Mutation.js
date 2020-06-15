@@ -309,12 +309,16 @@ const Mutations = {
 
     const { createReadStream, mimetype } = await file;
 
+    console.log({ mimetype });
+
     switch (mimetype) {
       case "image/png":
       case "image/jpg":
+      case "image/heic":
         fileType = "image";
         break;
       case "video/mp4":
+      case "video/quicktime":
         fileType = "video";
         break;
     }
