@@ -314,6 +314,7 @@ const Mutations = {
     switch (mimetype) {
       case "image/png":
       case "image/jpg":
+      case "image/jpeg":
       case "image/heic":
         fileType = "image";
         break;
