@@ -323,6 +323,8 @@ const Mutations = {
         break;
     }
 
+    // TODO: already converting .heic file for image preview on FE. Do something similar here in Node to convert to .jpg and retain metadata before sending to cloudinary
+
     const tags = ["user_post"];
     const folder = `users/${ctx.req.userId}/uploads/${fileType}s`;
     const { resultSecureUrl, publicId } = await processUpload({
