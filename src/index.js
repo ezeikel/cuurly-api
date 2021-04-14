@@ -14,9 +14,8 @@ const Sentry = require("@sentry/node");
 
 Sentry.init({
   enabled: process.env.NODE_ENV === "production",
-  environment: process.NODE_ENV,
-  dsn:
-    "https://d9fee5a77a6a4e6ca633668d5dd849dc@o358156.ingest.sentry.io/5257206",
+  environment: process.env.NODE_ENV,
+  dsn: process.env.SENTRY_DSN,
 });
 
 const app = express();
