@@ -245,7 +245,7 @@ const Mutations = {
     const followers = await ctx.prisma.user({ id }, info).followers();
     const followerIds = followers.map((follower) => follower.id);
 
-    if (followerIds.includes(ctx.req.userId)) {
+    if (followerIds.includes(ctx.user.id)) {
       throw new Error(`You are already following ${id}`);
     }
 
@@ -255,14 +255,14 @@ const Mutations = {
       },
       data: {
         followers: {
-          connect: { id: ctx.req.userId },
+          connect: { id: ctx.user.id },
         },
       },
     });
 
     return ctx.prisma.updateUser({
       where: {
-        id: ctx.req.userId,
+        id: ctx.user.id,
       },
       data: {
         following: {
@@ -277,7 +277,7 @@ const Mutations = {
     const followers = await ctx.prisma.user({ id }, info).followers();
     const followerIds = followers.map((follower) => follower.id);
 
-    if (!followerIds.includes(ctx.req.userId)) {
+    if (!followerIds.includes(ctx.user.id)) {
       throw new Error(`You are not following ${id}`);
     }
 
@@ -287,14 +287,14 @@ const Mutations = {
       },
       data: {
         followers: {
-          disconnect: { id: ctx.req.userId },
+          disconnect: { id: ctx.user.id },
         },
       },
     });
 
     return ctx.prisma.updateUser({
       where: {
-        id: ctx.req.userId,
+        id: ctx.user.id,
       },
       data: {
         following: {
@@ -325,7 +325,7 @@ const Mutations = {
     }
 
     const tags = ["user_post"];
-    const folder = `users/${ctx.req.userId}/uploads/${fileType}s`;
+    const folder = `users/${ctx.user.id}/uploads/${fileType}s`;
     const { resultSecureUrl, publicId } = await processUpload({
       file: { createReadStream, fileType },
       tags,
@@ -336,7 +336,7 @@ const Mutations = {
       {
         author: {
           connect: {
-            id: ctx.req.userId,
+            id: ctx.user.id,
           },
         },
         content: {
@@ -384,7 +384,7 @@ const Mutations = {
       {
         user: {
           connect: {
-            id: ctx.req.userId,
+            id: ctx.user.id,
           },
         },
         post: {
@@ -413,7 +413,7 @@ const Mutations = {
       text,
       writtenBy: {
         connect: {
-          id: ctx.req.userId,
+          id: ctx.user.id,
         },
       },
     });
@@ -444,7 +444,7 @@ const Mutations = {
 
     if (profilePicture) {
       const tags = ["user_profile_picture"];
-      const folder = `users/${ctx.req.userId}/uploads/images`;
+      const folder = `users/${ctx.user.id}/uploads/images`;
 
       const { createReadStream } = await profilePicture;
 
@@ -461,7 +461,7 @@ const Mutations = {
     }
 
     if (password) {
-      const user = await ctx.prisma.user({ id: ctx.req.userId });
+      const user = await ctx.prisma.user({ id: ctx.user.id });
       const valid = await bcrypt.compare(oldPassword, user.password);
 
       if (!valid) {
@@ -474,7 +474,7 @@ const Mutations = {
     return ctx.prisma.updateUser(
       {
         where: {
-          id: ctx.req.userId,
+          id: ctx.user.id,
         },
         data: {
           name,

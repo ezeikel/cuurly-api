@@ -1,23 +1,25 @@
-function hasPermission(user, permissionsNeeded) {
+const hasPermission = (userPermissions, permissionsNeeded) => {
   // TODO: Everybody has permission for now
   return;
-  const matchedPermissions = user.permissions.filter(permissionTheyHave =>
+  const matchedPermissions = userPermissions.filter((permissionTheyHave) =>
     permissionsNeeded.includes(permissionTheyHave)
   );
   if (!matchedPermissions.length) {
     throw new Error(`You do not have sufficient permissions
       : ${permissionsNeeded}
       You Have:
-      ${user.permissions}
+      ${userPermissions}
       `);
   }
-}
+};
 
-function isLoggedIn(ctx) {
-  if (!ctx.req.userId) {
-    throw new Error('You must be logged in to do that.');
+const isLoggedIn = (ctx) => {
+  if (!ctx.user.id) {
+    throw new Error("You must be logged in to do that.");
   }
-}
+};
 
-exports.hasPermission = hasPermission;
-exports.isLoggedIn = isLoggedIn;
+module.exports = {
+  hasPermission,
+  isLoggedIn,
+};

@@ -2,12 +2,13 @@ const { isLoggedIn, hasPermission } = require("../utils");
 
 const Query = {
   currentUser: (_, args, ctx, info) => {
-    if (!ctx.req.userId) {
+    if (!ctx.user) {
       return null;
     }
+
     return ctx.prisma.user(
       {
-        id: ctx.req.userId,
+        id: ctx.user.id,
       },
       info
     );
@@ -15,13 +16,13 @@ const Query = {
   users: (_, { where }, ctx, info) => {
     isLoggedIn(ctx);
 
-    hasPermission(ctx.req.user, ["ADMIN", "PERMISSIONUPATE"]);
+    hasPermission(ctx.user.permissions, ["ADMIN", "PERMISSIONUPATE"]);
 
     // just filtering on username for now until OR is added back for mongo connector - https://github.com/prisma/prisma/issues/3897
 
     return ctx.prisma.users({ where }, info);
   },
-  user: async (_, { id, username, email }, ctx, info) =>
+  user: (_, { id, username, email }, ctx, info) =>
     ctx.prisma.user({ id, username, email }, info),
   userz: (_, args, ctx, info) => ctx.prisma.users({}, info),
   following: (_, { id, username, email }, ctx, info) =>
@@ -37,7 +38,7 @@ const Query = {
     return ctx.prisma.posts(
       {
         where: {
-          author: { id_in: [...followingIds, ctx.req.userId] },
+          author: { id_in: [...followingIds, ctx.user.id] },
         },
         orderBy: "createdAt_DESC",
       },
@@ -51,7 +52,7 @@ const Query = {
     return ctx.prisma.posts(
       {
         where: {
-          author: { id_not_in: [...followingIds, ctx.req.userId] },
+          author: { id_not_in: [...followingIds, ctx.user.id] },
         },
         orderBy: "createdAt_DESC",
       },
