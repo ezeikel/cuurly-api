@@ -13,6 +13,7 @@ const keys = [
   "MAIL_PORT",
   "MAIL_USER",
   "MAIL_PASS",
+  "DATABASE_URL"
 ];
 
 let contents =

@@ -13,13 +13,4 @@ const hasPermission = (userPermissions, permissionsNeeded) => {
   }
 };
 
-const isLoggedIn = (ctx) => {
-  if (!ctx.user.id) {
-    throw new Error("You must be logged in to do that.");
-  }
-};
-
-module.exports = {
-  hasPermission,
-  isLoggedIn,
-};
+export default hasPermission;

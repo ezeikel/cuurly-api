@@ -1,21 +1,20 @@
-const { prisma } = require("../generated/prisma-client");
-const { GraphQLScalarType } = require("graphql");
-const { Kind } = require("graphql/language");
+// const { prisma } = require("../generated/prisma-client");
+import { GraphQLScalarType } from "graphql";
+import { Kind } from "graphql/language";
 
 const Custom = {
   Date: new GraphQLScalarType({
-    // https://www.apollographql.com/docs/apollo-server/features/scalars-enums.html#custom-scalars
     name: "Date",
     description: "Date custom scalar type",
+    serialize(value) {
+      return value.getTime(); // value sent to client
+    },
     parseValue(value) {
       return new Date(value); // value from the client
     },
-    serialize(value) {
-      return new Date(value).getTime(); // value sent to the client
-    },
     parseLiteral(ast) {
       if (ast.kind === Kind.INT) {
-        return parseInt(ast.value, 10); // ast value is always in string format
+        return new Date(ast.value); // ast value is always in string format
       }
       return null;
     },
@@ -33,7 +32,7 @@ const Custom = {
     author: (parent) => prisma.post({ id: parent.id }).author(),
     likes: (parent) => prisma.post({ id: parent.id }).likes(),
     comments: (parent) => prisma.post({ id: parent.id }).comments(),
-    content: (parent) => prisma.post({ id: parent.id }).content(),
+    media: (parent) => prisma.post({ id: parent.id }).media(),
   },
   Like: {
     user: (parent) => prisma.like({ id: parent.id }).user(),
@@ -44,4 +43,4 @@ const Custom = {
   },
 };
 
-module.exports = Custom;
+export default Custom;
