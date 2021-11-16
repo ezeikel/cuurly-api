@@ -1,4 +1,3 @@
-// const { prisma } = require("../generated/prisma-client");
 import { GraphQLScalarType } from "graphql";
 import { Kind } from "graphql/language";
 
@@ -19,28 +18,28 @@ const Custom = {
       return null;
     },
   }),
-  User: {
-    posts: (parent) =>
-      prisma.user({ id: parent.id }).posts({ orderBy: "createdAt_DESC" }),
-    following: (parent) => prisma.user({ id: parent.id }).following(),
-    followers: (parent) => prisma.user({ id: parent.id }).followers(),
-    likes: (parent) => prisma.user({ id: parent.id }).likes(),
-    comments: (parent) => prisma.user({ id: parent.id }).comments(),
-    profilePicture: (parent) => prisma.user({ id: parent.id }).profilePicture(),
-  },
-  Post: {
-    author: (parent) => prisma.post({ id: parent.id }).author(),
-    likes: (parent) => prisma.post({ id: parent.id }).likes(),
-    comments: (parent) => prisma.post({ id: parent.id }).comments(),
-    media: (parent) => prisma.post({ id: parent.id }).media(),
-  },
-  Like: {
-    user: (parent) => prisma.like({ id: parent.id }).user(),
-    post: (parent) => prisma.like({ id: parent.id }).post(),
-  },
-  Comment: {
-    writtenBy: (parent) => prisma.comment({ id: parent.id }).writtenBy(),
-  },
+  // User: {
+  //   posts: (parent, {}, { prisma }) =>
+  //     prisma.user.findUnique({ where: { id: parent.id }}).posts({ orderBy: "createdAt_DESC" }),
+  //   following: (parent, {}, { prisma }) => prisma.user.findUnique({ where: { id: parent.id }}).following(),
+  //   followers: (parent, {}, { prisma }) => prisma.user.findUnique({ where: { id: parent.id }}).followers(),
+  //   likes: (parent, {}, { prisma }) => prisma.user.findUnique({ where: { id: parent.id }}).likes(),
+  //   comments: (parent, {}, { prisma }) => prisma.user.findUnique({ where: { id: parent.id }}).comments(),
+  //   profilePicture: (parent, {}, { prisma }) => prisma.user.findUnique({ where: { id: parent.id }}).profilePicture(),
+  // },
+  // Post: {
+  //   author: (parent, {}, { prisma }) => prisma.post.findUnique({ where: { id: parent.id }}).author(),
+  //   likes: (parent, {}, { prisma }) => prisma.post.findUnique({ where: { id: parent.id }}).likes(),
+  //   comments: (parent, {}, { prisma }) => prisma.post.findUnique({ where: { id: parent.id }}).comments(),
+  //   media: (parent, {}, { prisma }) => prisma.post.findUnique({ where: { id: parent.id }}).media(),
+  // },
+  // Like: {
+  //   user: (parent, {}, { prisma }) => prisma.like.findUnique({ where: { id: parent.id }}).user(),
+  //   post: (parent, {}, { prisma }) => prisma.like.findUnique({ where: { id: parent.id }}).post(),
+  // },
+  // Comment: {
+  //   writtenBy: (parent, {}, { prisma }) => prisma.comment.findUnique({ where: { id: parent.id }}).writtenBy(),
+  // },
 };
 
 export default Custom;

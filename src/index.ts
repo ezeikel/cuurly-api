@@ -171,9 +171,28 @@ const startApolloServer = async (typeDefs, resolvers) => {
   const app = express();
   const httpServer = http.createServer(app);
 
-  // enable cors
+  const whitelist = [
+    /\.cuurly\.co/,
+    /localhost/,
+    /studio\.apollographql\.com/,
+    /vercel\.app/,
+    /bs-local\.com/,
+    /airtableblocks\.com/,
+  ];
+
   const corsOptions = {
-    origin: "*",
+    origin: (origin, callback) => {
+      if (
+        whitelist.includes(origin) ||
+        whitelist.filter(url => url.test && url.test(origin)).length ||
+        !origin
+      ) {
+        callback(null, true);
+      } else {
+        console.error(`Not allowed by CORS: ${origin}`);
+        callback(new Error(`Not allowed by CORS: ${origin}`));
+      }
+    },
     credentials: true,
   };
 

@@ -13,7 +13,7 @@ const Query = {
     );
   },
   users: (parent, args, context) => {
-    // isLoggedIn(context.user?.id);
+    isLoggedIn(context.user?.id);
 
     // hasPermission(context.user.permissions, ["ADMIN", "PERMISSIONUPATE"]);
 
@@ -30,39 +30,44 @@ const Query = {
     context.prisma.user.findUnique({ where: { id, username, email }}).followers(),
   posts: (parent, args, context) => context.prisma.user.findMany(),
   post: (parent, { id }, context) => context.prisma.post.findUnique({ where: { id }}),
-  feed: async (parent, { id }, context) => {
-    const following = await context.prisma.user.findByUnique({ where: { id }}).following();
+  feed: async (parent, { id }, { prisma, user: { id: userId } }) => {
+    const following = await prisma.user.findUnique({ where: { id }}).following();
     const followingIds = following.map((follower) => follower.id);
 
-    return context.prisma.post.findMany(
-      {
-        where: {
-          author: { id_in: [...followingIds, context.user.id] },
-        },
-        orderBy: "createdAt_DESC",
+    return prisma.post.findMany({
+      where: {
+        author: { is: { id: { in: [...followingIds, userId] } } },
       },
-    );
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
   },
-  explore: async (parent, { id }, context) => {
-    const following = await context.prisma.user.findUnique({ where: { id }}).following();
+  explore: async (parent, { id }, { prisma, user: { id: userId } }) => {
+    const following = await prisma.user.findUnique({ where: { id }}).following();
     const followingIds = following.map((follower) => follower.id);
 
-    return context.prisma.post.findMany(
+
+    return prisma.post.findMany(
       {
         where: {
-          author: { id_not_in: [...followingIds, context.user.id] },
+          author: { isNot: { id: { in: [...followingIds, userId] } } },
         },
-        orderBy: "createdAt_DESC",
+        orderBy: {
+          createdAt: "desc"
+        }
       },
     );
   },
   likedPosts: async (parent, { id }, context) => {
-    return context.prisma.post.findMany(
+    return context.prisma.like.findMany(
       {
         where: {
-          likes_every: { id: id },
+          user: { id },
         },
-        orderBy: "createdAt_DESC", // TODO: This should be ordered by WHEN liked not when liked post was created
+        orderBy: { // TODO: This should be ordered by WHEN liked not when liked post was created
+          createdAt: "desc"
+        }
       },
     );
   },
