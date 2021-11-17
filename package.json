@@ -49,6 +49,7 @@
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
     "nodemailer": "^6.7.0",
+    "stripe": "^8.189.0",
     "util": "^0.12.4"
   },
   "devDependencies": {
@@ -69,7 +70,9 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^16.0.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
     "is-ci": "^3.0.1",

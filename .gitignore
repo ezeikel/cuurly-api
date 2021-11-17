@@ -1,4 +1,4 @@
-node_modules
+node_modules/
 temp
 npm-debug.log
 .DS_store

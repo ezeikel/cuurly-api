@@ -1,6 +1,7 @@
 /* eslint no-console: ["error", { allow: ["warn", "error", "log"] }] */
 const fs = require("fs");
-const writeFile = fs.writeFile;
+
+const { writeFile } = fs;
 const defaults = require("../process.defaults");
 
 // variables needed by the server

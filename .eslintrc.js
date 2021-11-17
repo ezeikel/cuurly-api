@@ -3,7 +3,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  extends: ["eslint:recommended", "airbnb-base", "eslint-config-prettier"],
+  extends: ["airbnb-base", "plugin:prettier/recommended"],
   env: {
     node: true,
     mongo: true,
@@ -21,8 +21,9 @@ module.exports = {
       },
       plugins: ["@typescript-eslint/eslint-plugin"],
       extends: [
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
+        "airbnb-base",
+        "airbnb-typescript/base",
+        "plugin:prettier/recommended",
       ],
     },
     {
