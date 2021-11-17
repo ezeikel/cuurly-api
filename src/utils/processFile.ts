@@ -1,6 +1,14 @@
 import processUpload from "./processUpload";
 
-const processFile = async ({ file, tags, userId }: { file: any; tags: string[], userId: string }) => {
+const processFile = async ({
+  file,
+  tags,
+  userId,
+}: {
+  file: any;
+  tags: string[];
+  userId: string;
+}) => {
   let fileType;
   const { createReadStream, mimetype } = await file;
 
@@ -31,7 +39,7 @@ const processFile = async ({ file, tags, userId }: { file: any; tags: string[], 
   return {
     url: resultSecureUrl,
     publicId,
-    fileType
+    fileType,
   };
 };
 

@@ -1,4 +1,4 @@
-import { isLoggedIn, hasPermission } from "../utils"
+import { isLoggedIn, hasPermission } from "../utils";
 
 const Query = {
   currentUser: (parent, args, context) => {
@@ -6,11 +6,11 @@ const Query = {
       return null;
     }
 
-    return context.prisma.user.findUnique(
-      { where: {
+    return context.prisma.user.findUnique({
+      where: {
         id: context.user.id,
-      }}
-    );
+      },
+    });
   },
   users: (parent, args, context) => {
     isLoggedIn(context.user?.id);
@@ -25,14 +25,21 @@ const Query = {
     context.prisma.user.findUnique({ where: { id, username, email } }),
   userz: (parent, args, context) => context.prisma.user.findMany(),
   following: (parent, { id, username, email }, context) =>
-    context.prisma.user.findUnique({ where: { id, username, email }}).following(),
+    context.prisma.user
+      .findUnique({ where: { id, username, email } })
+      .following(),
   followers: (parent, { id, username, email }, context) =>
-    context.prisma.user.findUnique({ where: { id, username, email }}).followers(),
+    context.prisma.user
+      .findUnique({ where: { id, username, email } })
+      .followers(),
   posts: (parent, args, context) => context.prisma.user.findMany(),
-  post: (parent, { id }, context) => context.prisma.post.findUnique({ where: { id }}),
+  post: (parent, { id }, context) =>
+    context.prisma.post.findUnique({ where: { id } }),
   feed: async (parent, { id }, { prisma, user: { id: userId } }) => {
-    const following = await prisma.user.findUnique({ where: { id }}).following();
-    const followingIds = following.map((follower) => follower.id);
+    const following = await prisma.user
+      .findUnique({ where: { id } })
+      .following();
+    const followingIds = following.map(follower => follower.id);
 
     return prisma.post.findMany({
       where: {
@@ -44,32 +51,30 @@ const Query = {
     });
   },
   explore: async (parent, { id }, { prisma, user: { id: userId } }) => {
-    const following = await prisma.user.findUnique({ where: { id }}).following();
-    const followingIds = following.map((follower) => follower.id);
+    const following = await prisma.user
+      .findUnique({ where: { id } })
+      .following();
+    const followingIds = following.map(follower => follower.id);
 
-
-    return prisma.post.findMany(
-      {
-        where: {
-          author: { isNot: { id: { in: [...followingIds, userId] } } },
-        },
-        orderBy: {
-          createdAt: "desc"
-        }
+    return prisma.post.findMany({
+      where: {
+        author: { isNot: { id: { in: [...followingIds, userId] } } },
       },
-    );
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
   },
   likedPosts: async (parent, { id }, context) => {
-    return context.prisma.like.findMany(
-      {
-        where: {
-          user: { id },
-        },
-        orderBy: { // TODO: This should be ordered by WHEN liked not when liked post was created
-          createdAt: "desc"
-        }
+    return context.prisma.like.findMany({
+      where: {
+        user: { id },
       },
-    );
+      orderBy: {
+        // TODO: This should be ordered by WHEN liked not when liked post was created
+        createdAt: "desc",
+      },
+    });
   },
 };
 

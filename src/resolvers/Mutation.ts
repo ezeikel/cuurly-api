@@ -14,11 +14,13 @@ const Mutations = {
     args.username = args.username.toLowerCase();
 
     // TODO: Do some kind of check for taken username aswell
-    const exists = await context.prisma.user.findUnique({ where: { email: args.email } });
+    const exists = await context.prisma.user.findUnique({
+      where: { email: args.email },
+    });
 
     if (exists) {
       throw new Error(
-        "email: Hmm, a user with that email already exists. Use another one or sign in."
+        "email: Hmm, a user with that email already exists. Use another one or sign in.",
       );
     }
     // hash password
@@ -28,7 +30,7 @@ const Mutations = {
       data: {
         ...args,
         password,
-      }
+      },
     });
     // create JWT token for user
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
@@ -49,14 +51,14 @@ const Mutations = {
     });
     if (!user) {
       throw new Error(
-        "username: Hmm, we couldn't find that username in our records. Try again."
+        "username: Hmm, we couldn't find that username in our records. Try again.",
       );
     }
     // check if the password is correct
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       throw new Error(
-        "password: Hmm, that password doesn't match the one we have on record. Try again."
+        "password: Hmm, that password doesn't match the one we have on record. Try again.",
       );
     }
     // generate the jwt
@@ -77,10 +79,10 @@ const Mutations = {
   },
   requestReset: async (parent, { email }, context) => {
     // check if this user exists
-    const user = await context.prisma.user.findUnique({ where: { email }});
+    const user = await context.prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new Error(
-        "email: Hmm, we couldn't find that email in our records. Try again."
+        "email: Hmm, we couldn't find that email in our records. Try again.",
       );
     }
     // set a reset token and expiry for that user
@@ -106,9 +108,7 @@ const Mutations = {
         \n\n
         We got a request to reset your Crownd password.
         <button style="color:#3b5998;text-decoration:none;display:block;width:370px">
-          <a href="${
-            process.env.FRONTEND_URL
-          }/reset?resetToken=${resetToken}">Reset Password</a>
+          <a href="${process.env.FRONTEND_URL}/reset?resetToken=${resetToken}">Reset Password</a>
         </button>
         \n\n
         If you ignore this message, your password will not be changed. If you didn't request a password reset, <a href="#">let us know</a>.
@@ -164,8 +164,10 @@ const Mutations = {
   },
   follow: async (parent, { id }, context) => {
     isLoggedIn(context.user.id);
-    const followers = await context.prisma.user.findUnique({ where: { id } }).followers();
-    const followerIds = followers.map((follower) => follower.id);
+    const followers = await context.prisma.user
+      .findUnique({ where: { id } })
+      .followers();
+    const followerIds = followers.map(follower => follower.id);
     if (followerIds.includes(context.user.id)) {
       throw new Error(`You are already following ${id}`);
     }
@@ -192,8 +194,10 @@ const Mutations = {
   },
   unfollow: async (parent, { id }, context) => {
     isLoggedIn(context.user.id);
-    const followers = await context.prisma.user.findUnique({ where: { id }}).followers();
-    const followerIds = followers.map((follower) => follower.id);
+    const followers = await context.prisma.user
+      .findUnique({ where: { id } })
+      .followers();
+    const followerIds = followers.map(follower => follower.id);
     if (!followerIds.includes(context.user.id)) {
       throw new Error(`You are not following ${id}`);
     }
@@ -224,7 +228,7 @@ const Mutations = {
     const { url, publicId, fileType } = await processFile({
       file,
       tags,
-      userId: context.user.id
+      userId: context.user.id,
     });
     return context.prisma.post.create({
       data: {
@@ -233,7 +237,8 @@ const Mutations = {
             id: context.user.id,
           },
         },
-        media: { // TODO: should be an array of media
+        media: {
+          // TODO: should be an array of media
           create: {
             type: fileType.toUpperCase(),
             url,
@@ -241,7 +246,7 @@ const Mutations = {
           },
         },
         caption,
-      }
+      },
     });
   },
   deletePost: async (parent, { id, publicId }, context) => {
@@ -252,7 +257,7 @@ const Mutations = {
         post: {
           id,
         },
-      }
+      },
     });
     await context.prisma.like.deleteMany({
       where: {
@@ -283,8 +288,8 @@ const Mutations = {
             id,
           },
         },
-      }},
-    );
+      },
+    });
   },
   unlikePost: (parent, { id }, context) => {
     isLoggedIn(context.user.id);
@@ -305,7 +310,7 @@ const Mutations = {
             id: context.user.id,
           },
         },
-      }
+      },
     });
   },
   deleteComment: (parent, { id }, context) => {
@@ -345,34 +350,34 @@ const Mutations = {
       };
     }
     if (password) {
-      const user = await context.prisma.user.findUnique({ where: { id: context.user.id } });
+      const user = await context.prisma.user.findUnique({
+        where: { id: context.user.id },
+      });
       const valid = await bcrypt.compare(oldPassword, user.password);
       if (!valid) {
         throw new Error("Invalid password!");
       }
       password = await bcrypt.hash(password, 10);
     }
-    return context.prisma.user.update(
-      {
-        where: {
-          id: context.user.id,
+    return context.prisma.user.update({
+      where: {
+        id: context.user.id,
+      },
+      data: {
+        firstName,
+        lastName,
+        username,
+        profilePicture: {
+          create: profilePicture,
         },
-        data: {
-          firstName,
-          lastName,
-          username,
-          profilePicture: {
-            create: profilePicture,
-          },
-          website,
-          bio,
-          email,
-          phoneNumber,
-          gender,
-          password,
-        },
-      }
-    );
+        website,
+        bio,
+        email,
+        phoneNumber,
+        gender,
+        password,
+      },
+    });
   },
 };
 

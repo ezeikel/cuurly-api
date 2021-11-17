@@ -20,7 +20,10 @@ module.exports = {
         project: "./tsconfig.json",
       },
       plugins: ["@typescript-eslint/eslint-plugin"],
-      extends: ["plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
+      extends: [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+      ],
     },
     {
       files: ["**/__tests__/**"],

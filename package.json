@@ -7,7 +7,7 @@
     "build": "babel src --config-file './.babelrc.json' --extensions .js,.ts --out-dir dist",
     "lint": "jest --config test/jest.lint.js",
     "check-types": "tsc",
-    "prettier": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|css|md|mdx|html)\"",
+    "prettier": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|css|md|mdx|html)\"",
     "format": "yarn prettier --write",
     "check-format": "yarn prettier --list-different",
     "validate": "npm-run-all --parallel check-types check-format lint build",

@@ -204,7 +204,6 @@ const startApolloServer = async (typeDefs, resolvers) => {
   }
 
   app.use(cookieParser());
-  
 
   const server = new ApolloServer({
     typeDefs,
@@ -218,17 +217,14 @@ const startApolloServer = async (typeDefs, resolvers) => {
 
   await server.start();
 
-// graphQL endpoint
-server.applyMiddleware({ app, path: "/graphql", cors: false });
+  // graphQL endpoint
+  server.applyMiddleware({ app, path: "/graphql", cors: false });
   await new Promise<void>(resolve =>
     httpServer.listen({ port: process.env.PORT }, resolve),
   );
   console.log(
-    `🚀 Server ready at http://localhost:${process.env.PORT}${
-      server.graphqlPath
-    }`,
+    `🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`,
   );
-}
+};
 
 startApolloServer(typeDefs, resolvers);
-
