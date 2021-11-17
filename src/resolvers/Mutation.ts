@@ -313,9 +313,9 @@ const Mutations = {
       },
     });
   },
-  deleteComment: (parent, { id }, context) => {
-    isLoggedIn(context.user.id);
-    return context.prisma.comment.delete({ where: { id } });
+  deleteComment: (parent, { id }, { prisma, user: { id: userId } }) => {
+    isLoggedIn(userId);
+    return prisma.comment.delete({ where: { id } });
   },
   updateUser: async (
     _,
@@ -332,17 +332,17 @@ const Mutations = {
       oldPassword,
       password,
     },
-    context,
+    { prisma, user: { id: userId } },
   ) => {
-    isLoggedIn(context.user.id);
+    isLoggedIn(userId);
     if (profilePicture) {
       const tags = ["user_profile_picture"];
-      const folder = `users/${context.user.id}/uploads/images`;
+      const folder = `users/${userId}/uploads/images`;
       const { createReadStream } = await profilePicture;
       const { url, publicId } = await processFile({
         file: { createReadStream, fileType: "image" },
         tags,
-        folder,
+        userId,
       });
       profilePicture = {
         url,
@@ -350,8 +350,8 @@ const Mutations = {
       };
     }
     if (password) {
-      const user = await context.prisma.user.findUnique({
-        where: { id: context.user.id },
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
       });
       const valid = await bcrypt.compare(oldPassword, user.password);
       if (!valid) {
@@ -359,9 +359,9 @@ const Mutations = {
       }
       password = await bcrypt.hash(password, 10);
     }
-    return context.prisma.user.update({
+    return prisma.user.update({
       where: {
-        id: context.user.id,
+        id: userId,
       },
       data: {
         firstName,

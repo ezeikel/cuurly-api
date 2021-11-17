@@ -5,11 +5,11 @@ const Custom = {
   Date: new GraphQLScalarType({
     name: "Date",
     description: "Date custom scalar type",
-    serialize(value) {
+    serialize(value: { getTime: () => string }) {
       return value.getTime(); // value sent to client
     },
     parseValue(value) {
-      return new Date(value); // value from the client
+      return new Date(value as string); // value from the client
     },
     parseLiteral(ast) {
       if (ast.kind === Kind.INT) {

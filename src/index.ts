@@ -3,14 +3,16 @@ import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import express from "express";
 import http from "http";
 import cors from "cors";
-import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
-require("dotenv").config();
+import dotenv from "dotenv";
+const morgan = require("morgan"); // BUG: https://github.com/expressjs/morgan/issues/190
 import { createContext } from "./context";
 import Mutation from "./resolvers/Mutation";
 import Query from "./resolvers/Query";
 import Custom from "./resolvers/Custom";
+
+dotenv.config();
 
 Sentry.init({
   enabled: process.env.NODE_ENV === "production",
