@@ -69,7 +69,7 @@ model Post {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
   caption   String
   media     Media[]
-  published Boolean
+  published Boolean   @default(false)
   author    User      @relation(fields: [authorId], references: [id])
   authorId  String    @db.ObjectId
   likes     Like[]
@@ -99,7 +99,7 @@ model User {
   gender           Gender    @default(value: NOTSPECIFIED)
   phoneNumber      String?
   resetToken       String?
-  resetTokenExpiry String?
+  resetTokenExpiry DateTime?
   website          String?
   posts            Post[]
   likes            Like[]

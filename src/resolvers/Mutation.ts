@@ -7,15 +7,27 @@ import { Context } from "../context";
 import { transport, makeNiceEmail } from "../mail";
 import { isLoggedIn, processFile } from "../utils";
 
+type SignupArgs = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+};
+
 const Mutations = {
-  signup: async (parent, args, context) => {
+  signup: async (
+    parent,
+    { firstName, lastName, email, username, password }: SignupArgs,
+    { prisma, res }: Context,
+  ) => {
     // TODO: Loop over args and lowercase
-    args.email = args.email.toLowerCase();
-    args.username = args.username.toLowerCase();
+    email = email.toLowerCase();
+    username = username.toLowerCase();
 
     // TODO: Do some kind of check for taken username aswell
-    const exists = await context.prisma.user.findUnique({
-      where: { email: args.email },
+    const exists = await prisma.user.findUnique({
+      where: { email },
     });
 
     if (exists) {
@@ -24,27 +36,30 @@ const Mutations = {
       );
     }
     // hash password
-    const password = await bcrypt.hash(args.password, 10);
+    password = await bcrypt.hash(password, 10);
     // create user in the db
-    const user = await context.prisma.user.create({
+    const user = await prisma.user.create({
       data: {
-        ...args,
+        firstName,
+        lastName,
+        email,
+        username,
         password,
       },
     });
     // create JWT token for user
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
     // we set the jwt as a cookie on the response
-    context.res.cookie("token", token, {
+    res.cookie("token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
     });
     // finally return user the the browser
     return user;
   },
-  signin: async (parent, { username, password }, context) => {
+  signin: async (parent, { username, password }, { prisma, res }: Context) => {
     // check if a user with username exists
-    const user = await context.prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         username,
       },
@@ -67,19 +82,19 @@ const Mutations = {
       process.env.APP_SECRET as string,
     );
     // set cookie with the token
-    context.res.cookie("token", token, {
+    res.cookie("token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365,
     });
     return user;
   },
-  signout: (parent: any, args: {}, context: Context) => {
-    context.res.clearCookie("token");
+  signout: (parent: any, args: {}, { res }: Context) => {
+    res.clearCookie("token");
     return { message: "Goodbye!" };
   },
-  requestReset: async (parent, { email }, context) => {
+  requestReset: async (parent, { email }, { prisma }: Context) => {
     // check if this user exists
-    const user = await context.prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new Error(
         "email: Hmm, we couldn't find that email in our records. Try again.",
@@ -89,7 +104,7 @@ const Mutations = {
     const randomBytesPromisified = promisify(randomBytes);
     const resetToken = (await randomBytesPromisified(20)).toString("hex");
     const resetTokenExpiry = (Date.now() + 36000000).toString(); // 1 hour from now
-    await context.prisma.user.update({
+    await prisma.user.update({
       where: {
         email,
       },
@@ -120,7 +135,7 @@ const Mutations = {
   resetPassword: async (
     _,
     { resetToken, password, confirmPassword },
-    context,
+    { prisma, res }: Context,
   ) => {
     // check if that passwords match
     if (password !== confirmPassword) {
@@ -128,11 +143,11 @@ const Mutations = {
     }
     // check if its a legit reset token
     // check if its expired
-    const [user] = await context.prisma.user.findMany({
+    const [user] = await prisma.user.findMany({
       where: {
         AND: [
           { resetToken },
-          { resetTokenExpiry_gt: (Date.now() - 3600000).toString() },
+          { resetTokenExpiry: { gt: (Date.now() - 3600000).toString() } },
         ],
       },
     });
@@ -142,7 +157,7 @@ const Mutations = {
     // hash new password
     const newPassword = await bcrypt.hash(password, 10);
     // save a new password to the user and set resetToken fields back to null
-    const updatedUser = await context.prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: {
         email: user.email,
       },
@@ -155,35 +170,35 @@ const Mutations = {
     // generate jwt
     const token = jwt.sign({ userId: updatedUser.id }, process.env.APP_SECRET);
     // we set the jwt as a cookie on the response
-    context.res.cookie("token", token, {
+    res.cookie("token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
     });
     // TODO: Check if we are returning everything on user here
     return updatedUser;
   },
-  follow: async (parent, { id }, context) => {
-    isLoggedIn(context.user.id);
-    const followers = await context.prisma.user
+  follow: async (parent, { id }, { prisma, user: { id: userId } }: Context) => {
+    isLoggedIn(userId);
+    const followers = await prisma.user
       .findUnique({ where: { id } })
       .followers();
     const followerIds = followers.map(follower => follower.id);
-    if (followerIds.includes(context.user.id)) {
+    if (followerIds.includes(userId)) {
       throw new Error(`You are already following ${id}`);
     }
-    await context.prisma.user.update({
+    await prisma.user.update({
       where: {
         id,
       },
       data: {
         followers: {
-          connect: { id: context.user.id },
+          connect: { id: userId },
         },
       },
     });
-    return context.prisma.user.update({
+    return prisma.user.update({
       where: {
-        id: context.user.id,
+        id: userId,
       },
       data: {
         following: {
@@ -192,28 +207,32 @@ const Mutations = {
       },
     });
   },
-  unfollow: async (parent, { id }, context) => {
-    isLoggedIn(context.user.id);
-    const followers = await context.prisma.user
+  unfollow: async (
+    parent,
+    { id },
+    { prisma, user: { id: userId } }: Context,
+  ) => {
+    isLoggedIn(userId);
+    const followers = await prisma.user
       .findUnique({ where: { id } })
       .followers();
     const followerIds = followers.map(follower => follower.id);
-    if (!followerIds.includes(context.user.id)) {
+    if (!followerIds.includes(userId)) {
       throw new Error(`You are not following ${id}`);
     }
-    await context.prisma.user.update({
+    await prisma.user.update({
       where: {
         id,
       },
       data: {
         followers: {
-          disconnect: { id: context.user.id },
+          disconnect: { id: userId },
         },
       },
     });
-    return context.prisma.user.update({
+    return prisma.user.update({
       where: {
-        id: context.user.id,
+        id: userId,
       },
       data: {
         following: {
@@ -222,19 +241,23 @@ const Mutations = {
       },
     });
   },
-  createPost: async (parent, { file, caption }, context) => {
-    isLoggedIn(context.user.id);
+  createPost: async (
+    parent,
+    { file, caption },
+    { prisma, user: { id: userId } }: Context,
+  ) => {
+    isLoggedIn(userId);
     const tags = ["user_post"];
     const { url, publicId, fileType } = await processFile({
       file,
       tags,
-      userId: context.user.id,
+      userId: userId,
     });
-    return context.prisma.post.create({
+    return prisma.post.create({
       data: {
         author: {
           connect: {
-            id: context.user.id,
+            id: userId,
           },
         },
         media: {
@@ -249,17 +272,21 @@ const Mutations = {
       },
     });
   },
-  deletePost: async (parent, { id, publicId }, context) => {
-    isLoggedIn(context.user.id);
+  deletePost: async (
+    parent,
+    { id, publicId },
+    { prisma, user: { id: userId } }: Context,
+  ) => {
+    isLoggedIn(userId);
     // deleting each related document due to https://github.com/prisma/prisma/issues/3796
-    await context.prisma.comment.deleteMany({
+    await prisma.comment.deleteMany({
       where: {
         post: {
           id,
         },
       },
     });
-    await context.prisma.like.deleteMany({
+    await prisma.like.deleteMany({
       where: {
         post: {
           id,
@@ -271,16 +298,16 @@ const Mutations = {
     cloudinary.v2.api.delete_resources([publicId], (error, result) => {
       if (error) console.log({ error });
     });
-    return context.prisma.post.delete({ where: { id } });
+    return prisma.post.delete({ where: { id } });
   },
-  likePost: (parent, { id }, context) => {
-    isLoggedIn(context.user.id);
+  likePost: (parent, { id }, { prisma, user: { id: userId } }: Context) => {
+    isLoggedIn(userId);
     // TODO: Add check to make sure a User cannot like a post more than once
-    return context.prisma.like.create({
+    return prisma.like.create({
       data: {
         user: {
           connect: {
-            id: context.user.id,
+            id: userId,
           },
         },
         post: {
@@ -291,13 +318,17 @@ const Mutations = {
       },
     });
   },
-  unlikePost: (parent, { id }, context) => {
-    isLoggedIn(context.user.id);
-    return context.prisma.like.delete({ where: { id } });
+  unlikePost: (parent, { id }, { prisma, user: { id: userId } }: Context) => {
+    isLoggedIn(userId);
+    return prisma.like.delete({ where: { id } });
   },
-  addComment: (parent, { id, text }, context) => {
-    isLoggedIn(context.user.id);
-    return context.prisma.comment.create({
+  addComment: (
+    parent,
+    { id, text },
+    { prisma, user: { id: userId } }: Context,
+  ) => {
+    isLoggedIn(userId);
+    return prisma.comment.create({
       data: {
         post: {
           connect: {
@@ -307,13 +338,17 @@ const Mutations = {
         text,
         writtenBy: {
           connect: {
-            id: context.user.id,
+            id: userId,
           },
         },
       },
     });
   },
-  deleteComment: (parent, { id }, { prisma, user: { id: userId } }) => {
+  deleteComment: (
+    parent,
+    { id },
+    { prisma, user: { id: userId } }: Context,
+  ) => {
     isLoggedIn(userId);
     return prisma.comment.delete({ where: { id } });
   },
@@ -332,7 +367,7 @@ const Mutations = {
       oldPassword,
       password,
     },
-    { prisma, user: { id: userId } },
+    { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
     if (profilePicture) {

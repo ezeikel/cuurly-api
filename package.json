@@ -14,7 +14,7 @@
     "start": "node dist/index.js",
     "dev": "yarn bake-env && yarn start:dev",
     "start:dev": "yarn prisma:generate && nodemon 'src/index.ts' --exec babel-node --config-file './.babelrc.json' --extensions .js,.ts -r dotenv/config",
-    "bake-env": "node ./scripts/process.env-generator.js",
+    "bake-env": "node ./scripts/process.env-generator.ts",
     "test": "is-ci \"test:coverage\" \"test:watch\"",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
