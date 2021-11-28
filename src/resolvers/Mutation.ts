@@ -251,7 +251,7 @@ const Mutations = {
     const { url, publicId, fileType } = await processFile({
       file,
       tags,
-      userId: userId,
+      userId,
     });
     return prisma.post.create({
       data: {

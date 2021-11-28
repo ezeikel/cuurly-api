@@ -108,7 +108,7 @@ const typeDefs = gql`
     #   skip: Int
     #   first: Int
     # ): [User!]!
-    users: [User!]!
+    users(query: String): [User!]!
     userz: [User!]! # Just for testing
     user(id: ID, username: String, email: String): User # TODO: Find a way to make it that you have to pass one of these
     following(id: ID, username: String, email: String): [User!]!

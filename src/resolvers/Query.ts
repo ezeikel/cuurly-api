@@ -1,4 +1,4 @@
-import { isLoggedIn, hasPermission } from "../utils";
+import { isLoggedIn } from "../utils";
 
 const Query = {
   currentUser: (parent, args, context) => {
@@ -12,14 +12,24 @@ const Query = {
       },
     });
   },
-  users: (parent, args, context) => {
+  users: (parent, { query }, context) => {
     isLoggedIn(context.user?.id);
+    let filter = {};
+
+    if (query) {
+      filter = {
+        // just filtering on username for now until OR is added back for mongo connector - https://github.com/prisma/prisma/issues/3897
+        where: {
+          username: {
+            contains: query,
+          },
+        },
+      };
+    }
 
     // hasPermission(context.user.permissions, ["ADMIN", "PERMISSIONUPATE"]);
 
-    // just filtering on username for now until OR is added back for mongo connector - https://github.com/prisma/prisma/issues/3897
-
-    return context.prisma.user.findMany();
+    return context.prisma.user.findMany(filter);
   },
   user: (parent, { id, username, email }, context) =>
     context.prisma.user.findUnique({ where: { id, username, email } }),
