@@ -11,6 +11,7 @@ module.exports = {
   },
   rules: {
     'valid-typeof': 'error',
+    'no-console': [2, { allow: ['warn', 'error'] }],
   },
   overrides: [
     {

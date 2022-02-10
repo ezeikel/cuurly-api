@@ -4,9 +4,9 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import * as Sentry from '@sentry/node';
 import dotenv from 'dotenv';
-const morgan = require('morgan'); // BUG: https://github.com/expressjs/morgan/issues/190
+import * as Sentry from '@sentry/node';
+import morgan from 'morgan';
 import { createContext } from './context';
 import Mutation from './resolvers/Mutation';
 import Query from './resolvers/Query';

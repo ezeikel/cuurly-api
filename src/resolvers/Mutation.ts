@@ -286,6 +286,7 @@ const Mutations = {
         },
       },
     });
+
     await prisma.like.deleteMany({
       where: {
         post: {
@@ -293,11 +294,15 @@ const Mutations = {
         },
       },
     });
+
     // TODO: promisify this
     // BUG: deleting video doesnt seem to work properly. Deleted from db but not from cloudinary
     cloudinary.v2.api.delete_resources([publicId], (error, result) => {
-      if (error) console.log({ error });
+      if (error) {
+        console.error({ error });
+      }
     });
+
     return prisma.post.delete({ where: { id } });
   },
   likePost: (parent, { id }, { prisma, user: { id: userId } }: Context) => {
@@ -371,6 +376,8 @@ const Mutations = {
   ) => {
     isLoggedIn(userId);
     if (profilePicture) {
+      // TODO: delete existing profile picture from cloudinary if there is one
+
       const tags = ['user_profile_picture'];
       const folder = `users/${userId}/uploads/images`;
       const { createReadStream } = await profilePicture;
@@ -384,6 +391,7 @@ const Mutations = {
         publicId,
       };
     }
+
     if (password) {
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -394,6 +402,7 @@ const Mutations = {
       }
       password = await bcrypt.hash(password, 10);
     }
+
     return prisma.user.update({
       where: {
         id: userId,
@@ -402,15 +411,32 @@ const Mutations = {
         firstName,
         lastName,
         username,
-        profilePicture: {
-          create: profilePicture,
-        },
-        website,
-        bio,
         email,
         phoneNumber,
         gender,
         password,
+        profile: {
+          update: {
+            bio,
+            website,
+            picture: {
+              upsert: {
+                create: profilePicture
+                  ? {
+                      url: profilePicture.url,
+                      publicId: profilePicture.publicId,
+                    }
+                  : undefined,
+                update: profilePicture
+                  ? {
+                      url: profilePicture.url,
+                      publicId: profilePicture.publicId,
+                    }
+                  : undefined,
+              },
+            },
+          },
+        },
       },
     });
   },
