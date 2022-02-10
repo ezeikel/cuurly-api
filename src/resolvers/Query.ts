@@ -1,4 +1,4 @@
-import { isLoggedIn } from "../utils";
+import { isLoggedIn } from '../utils';
 
 const Query = {
   currentUser: (parent, args, context) => {
@@ -56,7 +56,7 @@ const Query = {
         author: { is: { id: { in: [...followingIds, userId] } } },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
   },
@@ -71,7 +71,7 @@ const Query = {
         author: { isNot: { id: { in: [...followingIds, userId] } } },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
   },
@@ -82,7 +82,7 @@ const Query = {
       },
       orderBy: {
         // TODO: This should be ordered by WHEN liked not when liked post was created
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
   },

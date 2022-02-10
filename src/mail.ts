@@ -1,12 +1,12 @@
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
 
 // TODO: Not sure why process.env values dont seem to be  set inside of this function
 export const transport = nodemailer.createTransport({
-  host: process.env.MAIL_HOST || "smtp.mailtrap.io",
+  host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
   port: process.env.MAIL_PORT || 2525,
   auth: {
-    user: process.env.MAIL_USER || "ab8fae85ac4f38",
-    pass: process.env.MAIL_PASS || "f56c575e4020c4",
+    user: process.env.MAIL_USER || 'ab8fae85ac4f38',
+    pass: process.env.MAIL_PASS || 'f56c575e4020c4',
   },
 });
 

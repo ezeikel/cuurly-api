@@ -1,11 +1,11 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { randomBytes } from "crypto";
-import { promisify } from "util";
-import cloudinary from "cloudinary";
-import { Context } from "../context";
-import { transport, makeNiceEmail } from "../mail";
-import { isLoggedIn, processFile } from "../utils";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { randomBytes } from 'crypto';
+import { promisify } from 'util';
+import cloudinary from 'cloudinary';
+import { Context } from '../context';
+import { transport, makeNiceEmail } from '../mail';
+import { isLoggedIn, processFile } from '../utils';
 
 type SignupArgs = {
   firstName: string;
@@ -32,7 +32,7 @@ const Mutations = {
 
     if (exists) {
       throw new Error(
-        "email: Hmm, a user with that email already exists. Use another one or sign in.",
+        'email: Hmm, a user with that email already exists. Use another one or sign in.',
       );
     }
     // hash password
@@ -50,7 +50,7 @@ const Mutations = {
     // create JWT token for user
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
     // we set the jwt as a cookie on the response
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
     });
@@ -82,15 +82,15 @@ const Mutations = {
       process.env.APP_SECRET as string,
     );
     // set cookie with the token
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365,
     });
     return user;
   },
   signout: (parent: any, args: {}, { res }: Context) => {
-    res.clearCookie("token");
-    return { message: "Goodbye!" };
+    res.clearCookie('token');
+    return { message: 'Goodbye!' };
   },
   requestReset: async (parent, { email }, { prisma }: Context) => {
     // check if this user exists
@@ -102,7 +102,7 @@ const Mutations = {
     }
     // set a reset token and expiry for that user
     const randomBytesPromisified = promisify(randomBytes);
-    const resetToken = (await randomBytesPromisified(20)).toString("hex");
+    const resetToken = (await randomBytesPromisified(20)).toString('hex');
     const resetTokenExpiry = (Date.now() + 36000000).toString(); // 1 hour from now
     await prisma.user.update({
       where: {
@@ -115,9 +115,9 @@ const Mutations = {
     });
     // email the user the reset token
     const res = await transport.sendMail({
-      from: "crowndapp@gmail.com",
+      from: 'crowndapp@gmail.com',
       to: user.email,
-      subject: "Reset Your Password",
+      subject: 'Reset Your Password',
       html: makeNiceEmail(`
         Hi ${user.username},
         \n\n
@@ -152,7 +152,7 @@ const Mutations = {
       },
     });
     if (!user) {
-      throw new Error("This is token is either invalid or expired!");
+      throw new Error('This is token is either invalid or expired!');
     }
     // hash new password
     const newPassword = await bcrypt.hash(password, 10);
@@ -170,7 +170,7 @@ const Mutations = {
     // generate jwt
     const token = jwt.sign({ userId: updatedUser.id }, process.env.APP_SECRET);
     // we set the jwt as a cookie on the response
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
     });
@@ -247,7 +247,7 @@ const Mutations = {
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
-    const tags = ["user_post"];
+    const tags = ['user_post'];
     const { url, publicId, fileType } = await processFile({
       file,
       tags,
@@ -371,11 +371,11 @@ const Mutations = {
   ) => {
     isLoggedIn(userId);
     if (profilePicture) {
-      const tags = ["user_profile_picture"];
+      const tags = ['user_profile_picture'];
       const folder = `users/${userId}/uploads/images`;
       const { createReadStream } = await profilePicture;
       const { url, publicId } = await processFile({
-        file: { createReadStream, fileType: "image" },
+        file: { createReadStream, fileType: 'image' },
         tags,
         userId,
       });
@@ -390,7 +390,7 @@ const Mutations = {
       });
       const valid = await bcrypt.compare(oldPassword, user.password);
       if (!valid) {
-        throw new Error("Invalid password!");
+        throw new Error('Invalid password!');
       }
       password = await bcrypt.hash(password, 10);
     }

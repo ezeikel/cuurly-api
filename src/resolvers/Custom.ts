@@ -1,10 +1,10 @@
-import { GraphQLScalarType } from "graphql";
-import { Kind } from "graphql/language";
+import { GraphQLScalarType } from 'graphql';
+import { Kind } from 'graphql/language';
 
 const Custom = {
   Date: new GraphQLScalarType({
-    name: "Date",
-    description: "Date custom scalar type",
+    name: 'Date',
+    description: 'Date custom scalar type',
     serialize(value: { getTime: () => string }) {
       return value.getTime(); // value sent to client
     },

@@ -1,21 +1,21 @@
-import { ApolloServer, gql } from "apollo-server-express";
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import express from "express";
-import http from "http";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import * as Sentry from "@sentry/node";
-import dotenv from "dotenv";
-const morgan = require("morgan"); // BUG: https://github.com/expressjs/morgan/issues/190
-import { createContext } from "./context";
-import Mutation from "./resolvers/Mutation";
-import Query from "./resolvers/Query";
-import Custom from "./resolvers/Custom";
+import { ApolloServer, gql } from 'apollo-server-express';
+import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import * as Sentry from '@sentry/node';
+import dotenv from 'dotenv';
+const morgan = require('morgan'); // BUG: https://github.com/expressjs/morgan/issues/190
+import { createContext } from './context';
+import Mutation from './resolvers/Mutation';
+import Query from './resolvers/Query';
+import Custom from './resolvers/Custom';
 
 dotenv.config();
 
 Sentry.init({
-  enabled: process.env.NODE_ENV === "production",
+  enabled: process.env.NODE_ENV === 'production',
   environment: process.env.NODE_ENV,
   dsn: process.env.SENTRY_DSN,
 });
@@ -201,8 +201,8 @@ const startApolloServer = async (typeDefs, resolvers) => {
   app.use(cors(corsOptions));
 
   // log all requests to the console
-  if (process.env.SILENCE_LOGS !== "true") {
-    app.use(morgan("dev"));
+  if (process.env.SILENCE_LOGS !== 'true') {
+    app.use(morgan('dev'));
   }
 
   app.use(cookieParser());
@@ -220,7 +220,7 @@ const startApolloServer = async (typeDefs, resolvers) => {
   await server.start();
 
   // graphQL endpoint
-  server.applyMiddleware({ app, path: "/graphql", cors: false });
+  server.applyMiddleware({ app, path: '/graphql', cors: false });
   await new Promise<void>(resolve =>
     httpServer.listen({ port: process.env.PORT }, resolve),
   );

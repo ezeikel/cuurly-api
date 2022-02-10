@@ -1,7 +1,7 @@
-import cloudinary from "cloudinary";
+import cloudinary from 'cloudinary';
 
 cloudinary.v2.config({
-  cloud_name: "crownd",
+  cloud_name: 'crownd',
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
 });
@@ -22,27 +22,27 @@ const processUpload = async ({
 
   const readableStream = createReadStream();
 
-  let resultUrl = "";
-  let resultSecureUrl = "";
-  let publicId = "";
+  let resultUrl = '';
+  let resultSecureUrl = '';
+  let publicId = '';
 
   // TODO: fix any
   const cloudinaryUpload = async ({ stream }: { stream: any }) => {
     // TODO: proper conditioning needed here
     const uploadConfig =
-      fileType === "image"
+      fileType === 'image'
         ? {
             folder,
             tags,
             overwrite: true,
             transformation: {
               width: 1080,
-              crop: "limit",
-              format: "jpg",
+              crop: 'limit',
+              format: 'jpg',
             },
           }
         : {
-            resource_type: "video",
+            resource_type: 'video',
             folder,
             tags,
             overwrite: true,

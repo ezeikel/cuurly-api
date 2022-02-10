@@ -1,4 +1,4 @@
-import processUpload from "./processUpload";
+import processUpload from './processUpload';
 
 const processFile = async ({
   file,
@@ -13,18 +13,18 @@ const processFile = async ({
   const { createReadStream, mimetype } = await file;
 
   switch (mimetype) {
-    case "image/png":
-    case "image/jpg":
-    case "image/jpeg":
-    case "image/heic":
-      fileType = "image";
+    case 'image/png':
+    case 'image/jpg':
+    case 'image/jpeg':
+    case 'image/heic':
+      fileType = 'image';
       break;
-    case "video/mp4":
-    case "video/quicktime":
-      fileType = "video";
+    case 'video/mp4':
+    case 'video/quicktime':
+      fileType = 'video';
       break;
     default:
-      fileType = "image";
+      fileType = 'image';
       break;
   }
 

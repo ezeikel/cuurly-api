@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient({
-  log: ["query"],
+  log: ['query'],
 });
 
 export type Context = {
