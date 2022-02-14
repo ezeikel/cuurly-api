@@ -28,7 +28,6 @@ enum MediaType {
 model Media {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
   type      MediaType @default(IMAGE)
-  caption   String?
   url       String
   publicId  String
   post      Post?     @relation(fields: [postId], references: [id])

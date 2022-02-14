@@ -9,12 +9,13 @@ const keys = [
   'APP_SECRET',
   'FRONTEND_URL',
   'PORT',
-  'STRIPE_SECRET',
+  'STRIPE_SECRET_KEY',
+  'DATABASE_URL',
   'MAIL_HOST',
   'MAIL_PORT',
   'MAIL_USER',
   'MAIL_PASS',
-  'DATABASE_URL',
+  'SENTRY_DSN',
 ];
 
 let contents =
