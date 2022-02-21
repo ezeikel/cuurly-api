@@ -1,7 +1,46 @@
+import { Context } from '../context';
 import { isLoggedIn } from '../utils';
 
+type UsersArgs = {
+  query?: string;
+};
+
+type UserArgs = {
+  id: string;
+  username: string;
+  email: string;
+};
+
+type FollowingArgs = {
+  id?: string;
+  username?: string;
+  email?: string;
+};
+
+type FollowersArgs = {
+  id?: string;
+  username?: string;
+  email?: string;
+};
+
+type PostArgs = {
+  id: string;
+};
+
+type FeedArgs = {
+  id: string;
+};
+
+type ExploreArgs = {
+  id: string;
+};
+
+type LikedPostsArgs = {
+  id: string;
+};
+
 const Query = {
-  currentUser: (parent, args, context) => {
+  currentUser: (parent: any, args: any, context: Context) => {
     if (!context.user) {
       return null;
     }
@@ -12,7 +51,7 @@ const Query = {
       },
     });
   },
-  users: (parent, { query }, context) => {
+  users: (parent: any, { query }: UsersArgs, context: Context) => {
     isLoggedIn(context.user?.id);
     let filter = {};
 
@@ -27,25 +66,35 @@ const Query = {
       };
     }
 
-    // hasPermission(context.user.permissions, ["ADMIN", "PERMISSIONUPATE"]);
-
     return context.prisma.user.findMany(filter);
   },
-  user: (parent, { id, username, email }, context) =>
+  user: (parent: any, { id, username, email }: UserArgs, context: Context) =>
     context.prisma.user.findUnique({ where: { id, username, email } }),
-  userz: (parent, args, context) => context.prisma.user.findMany(),
-  following: (parent, { id, username, email }, context) =>
+  following: (
+    parent: any,
+    { id, username, email }: FollowingArgs,
+    context: Context,
+  ) =>
     context.prisma.user
       .findUnique({ where: { id, username, email } })
       .following(),
-  followers: (parent, { id, username, email }, context) =>
+  followers: (
+    parent: any,
+    { id, username, email }: FollowersArgs,
+    context: Context,
+  ) =>
     context.prisma.user
       .findUnique({ where: { id, username, email } })
       .followers(),
-  posts: (parent, args, context) => context.prisma.user.findMany(),
-  post: (parent, { id }, context) =>
+  posts: (parent: any, args: any, context: Context) =>
+    context.prisma.user.findMany(),
+  post: (parent: any, { id }: PostArgs, context: Context) =>
     context.prisma.post.findUnique({ where: { id } }),
-  feed: async (parent, { id }, { prisma, user: { id: userId } }) => {
+  feed: async (
+    parent: any,
+    { id }: FeedArgs,
+    { prisma, user: { id: userId } }: Context,
+  ) => {
     const following = await prisma.user
       .findUnique({ where: { id } })
       .following();
@@ -60,7 +109,11 @@ const Query = {
       },
     });
   },
-  explore: async (parent, { id }, { prisma, user: { id: userId } }) => {
+  explore: async (
+    parent: any,
+    { id }: ExploreArgs,
+    { prisma, user: { id: userId } }: Context,
+  ) => {
     const following = await prisma.user
       .findUnique({ where: { id } })
       .following();
@@ -75,7 +128,7 @@ const Query = {
       },
     });
   },
-  likedPosts: async (parent, { id }, context) => {
+  likedPosts: async (parent: any, { id }: LikedPostsArgs, context: Context) => {
     return context.prisma.like.findMany({
       where: {
         user: { id },

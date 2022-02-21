@@ -1,5 +1,7 @@
 import { GraphQLScalarType } from 'graphql';
+import { GraphQLUpload } from 'graphql-upload';
 import { Kind } from 'graphql/language';
+import md5 from 'md5';
 
 const Custom = {
   Date: new GraphQLScalarType({
@@ -18,6 +20,13 @@ const Custom = {
       return null;
     },
   }),
+  Upload: GraphQLUpload,
+  User: {
+    gravatar: (parent: any) => {
+      const hash = md5(parent.email);
+      return `https://gravatar.com/avatar/${hash}?s=200`;
+    },
+  },
   // User: {
   //   posts: (parent, {}, { prisma }) =>
   //     prisma.user.findUnique({ where: { id: parent.id }}).posts({ orderBy: "createdAt_DESC" }),

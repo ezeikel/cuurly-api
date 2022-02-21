@@ -1,3 +1,4 @@
+import { MediaType } from '@prisma/client';
 import processUpload from './processUpload';
 
 const processFile = async ({
@@ -9,7 +10,7 @@ const processFile = async ({
   tags: string[];
   userId: string;
 }) => {
-  let fileType;
+  let fileType: MediaType;
   const { createReadStream, mimetype } = await file;
 
   switch (mimetype) {
@@ -17,14 +18,14 @@ const processFile = async ({
     case 'image/jpg':
     case 'image/jpeg':
     case 'image/heic':
-      fileType = 'image';
+      fileType = 'IMAGE';
       break;
     case 'video/mp4':
     case 'video/quicktime':
-      fileType = 'video';
+      fileType = 'VIDEO';
       break;
     default:
-      fileType = 'image';
+      fileType = 'IMAGE';
       break;
   }
 

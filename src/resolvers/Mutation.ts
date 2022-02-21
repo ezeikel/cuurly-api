@@ -1,3 +1,4 @@
+import { Gender } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
@@ -7,7 +8,7 @@ import { Context } from '../context';
 import { transport, makeNiceEmail } from '../mail';
 import { isLoggedIn, processFile } from '../utils';
 
-type SignupArgs = {
+type SignUpArgs = {
   firstName: string;
   lastName: string;
   email: string;
@@ -15,15 +16,79 @@ type SignupArgs = {
   password: string;
 };
 
+type SignInProps = {
+  username: string;
+  password: string;
+};
+
+type RequestResetArgs = {
+  email: string;
+};
+
+type ResetPasswordArgs = {
+  newPassword: string;
+  newPasswordConfirm: string;
+  resetToken: string;
+};
+
+type FollowArgs = {
+  id: string;
+};
+
+type UnfollowArgs = {
+  id: string;
+};
+
+type CreatePostArgs = {
+  file: any;
+  caption: string;
+};
+
+type DeletePostArgs = {
+  id: string;
+  publicId: string;
+};
+
+type LikePostArgs = {
+  id: string;
+};
+
+type UnlikePostArgs = {
+  id: string;
+};
+
+type AddCommentArgs = {
+  id: string;
+  text: string;
+};
+
+type DeleteComment = {
+  id: string;
+};
+
+type UpdateUserArgs = {
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  profilePicture?: string;
+  website?: string;
+  bio?: string;
+  email?: string;
+  phoneNumber?: string;
+  gender?: Gender;
+  oldPassword?: string;
+  password?: string;
+};
+
 const Mutations = {
   signup: async (
-    parent,
-    { firstName, lastName, email, username, password }: SignupArgs,
+    parent: any,
+    { firstName, lastName, email, username, password }: SignUpArgs,
     { prisma, res }: Context,
   ) => {
     // TODO: Loop over args and lowercase
-    email = email.toLowerCase();
-    username = username.toLowerCase();
+    const lowercaseEmail = email.toLowerCase();
+    const lowercaseUsername = username.toLowerCase();
 
     // TODO: Do some kind of check for taken username aswell
     const exists = await prisma.user.findUnique({
@@ -36,15 +101,15 @@ const Mutations = {
       );
     }
     // hash password
-    password = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     // create user in the db
     const user = await prisma.user.create({
       data: {
         firstName,
         lastName,
-        email,
-        username,
-        password,
+        email: lowercaseEmail,
+        username: lowercaseUsername,
+        password: hashedPassword,
       },
     });
     // create JWT token for user
@@ -57,7 +122,11 @@ const Mutations = {
     // finally return user the the browser
     return user;
   },
-  signin: async (parent, { username, password }, { prisma, res }: Context) => {
+  signin: async (
+    parent: any,
+    { username, password }: SignInProps,
+    { prisma, res }: Context,
+  ) => {
     // check if a user with username exists
     const user = await prisma.user.findUnique({
       where: {
@@ -92,7 +161,11 @@ const Mutations = {
     res.clearCookie('token');
     return { message: 'Goodbye!' };
   },
-  requestReset: async (parent, { email }, { prisma }: Context) => {
+  requestReset: async (
+    parent: any,
+    { email }: RequestResetArgs,
+    { prisma }: Context,
+  ) => {
     // check if this user exists
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
@@ -133,12 +206,12 @@ const Mutations = {
     return { message: `Message sent: ${res.messageId}` };
   },
   resetPassword: async (
-    _,
-    { resetToken, password, confirmPassword },
+    parent: any,
+    { resetToken, newPassword, newPasswordConfirm }: ResetPasswordArgs,
     { prisma, res }: Context,
   ) => {
     // check if that passwords match
-    if (password !== confirmPassword) {
+    if (newPassword !== newPasswordConfirm) {
       throw new Error("Passwords don't  match");
     }
     // check if its a legit reset token
@@ -155,14 +228,14 @@ const Mutations = {
       throw new Error('This is token is either invalid or expired!');
     }
     // hash new password
-    const newPassword = await bcrypt.hash(password, 10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     // save a new password to the user and set resetToken fields back to null
     const updatedUser = await prisma.user.update({
       where: {
         email: user.email,
       },
       data: {
-        password: newPassword,
+        password: hashedNewPassword,
         resetToken: null,
         resetTokenExpiry: null,
       },
@@ -177,7 +250,11 @@ const Mutations = {
     // TODO: Check if we are returning everything on user here
     return updatedUser;
   },
-  follow: async (parent, { id }, { prisma, user: { id: userId } }: Context) => {
+  follow: async (
+    parent: any,
+    { id }: FollowArgs,
+    { prisma, user: { id: userId } }: Context,
+  ) => {
     isLoggedIn(userId);
     const followers = await prisma.user
       .findUnique({ where: { id } })
@@ -208,8 +285,8 @@ const Mutations = {
     });
   },
   unfollow: async (
-    parent,
-    { id },
+    parent: any,
+    { id }: UnfollowArgs,
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
@@ -242,8 +319,8 @@ const Mutations = {
     });
   },
   createPost: async (
-    parent,
-    { file, caption },
+    parent: any,
+    { file, caption }: CreatePostArgs,
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
@@ -263,7 +340,7 @@ const Mutations = {
         media: {
           // TODO: should be an array of media
           create: {
-            type: fileType.toUpperCase(),
+            type: fileType,
             url,
             publicId,
           },
@@ -273,8 +350,8 @@ const Mutations = {
     });
   },
   deletePost: async (
-    parent,
-    { id, publicId },
+    parent: any,
+    { id, publicId }: DeletePostArgs,
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
@@ -297,7 +374,7 @@ const Mutations = {
 
     // TODO: promisify this
     // BUG: deleting video doesnt seem to work properly. Deleted from db but not from cloudinary
-    cloudinary.v2.api.delete_resources([publicId], (error, result) => {
+    cloudinary.v2.api.delete_resources([publicId], error => {
       if (error) {
         console.error({ error });
       }
@@ -305,7 +382,11 @@ const Mutations = {
 
     return prisma.post.delete({ where: { id } });
   },
-  likePost: (parent, { id }, { prisma, user: { id: userId } }: Context) => {
+  likePost: (
+    parent: any,
+    { id }: LikePostArgs,
+    { prisma, user: { id: userId } }: Context,
+  ) => {
     isLoggedIn(userId);
     // TODO: Add check to make sure a User cannot like a post more than once
     return prisma.like.create({
@@ -323,13 +404,17 @@ const Mutations = {
       },
     });
   },
-  unlikePost: (parent, { id }, { prisma, user: { id: userId } }: Context) => {
+  unlikePost: (
+    parent: any,
+    { id }: UnlikePostArgs,
+    { prisma, user: { id: userId } }: Context,
+  ) => {
     isLoggedIn(userId);
     return prisma.like.delete({ where: { id } });
   },
   addComment: (
-    parent,
-    { id, text },
+    parent: any,
+    { id, text }: AddCommentArgs,
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
@@ -350,15 +435,15 @@ const Mutations = {
     });
   },
   deleteComment: (
-    parent,
-    { id },
+    parent: any,
+    { id }: DeleteComment,
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
     return prisma.comment.delete({ where: { id } });
   },
   updateUser: async (
-    _,
+    parent: any,
     {
       firstName,
       lastName,
@@ -370,29 +455,31 @@ const Mutations = {
       phoneNumber,
       gender,
       oldPassword,
-      password,
-    },
+      password: updatedPassword,
+    }: UpdateUserArgs,
     { prisma, user: { id: userId } }: Context,
   ) => {
     isLoggedIn(userId);
+    let updatedHashedPassword;
+    let updatedProfilePicture;
+
     if (profilePicture) {
       // TODO: delete existing profile picture from cloudinary if there is one
 
       const tags = ['user_profile_picture'];
-      const folder = `users/${userId}/uploads/images`;
-      const { createReadStream } = await profilePicture;
       const { url, publicId } = await processFile({
-        file: { createReadStream, fileType: 'image' },
+        file: profilePicture, // TODO: does this need to be profilePicture.file?
         tags,
         userId,
       });
-      profilePicture = {
+
+      updatedProfilePicture = {
         url,
         publicId,
       };
     }
 
-    if (password) {
+    if (updatedPassword) {
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
@@ -400,7 +487,7 @@ const Mutations = {
       if (!valid) {
         throw new Error('Invalid password!');
       }
-      password = await bcrypt.hash(password, 10);
+      updatedHashedPassword = await bcrypt.hash(updatedPassword, 10);
     }
 
     return prisma.user.update({
@@ -414,25 +501,15 @@ const Mutations = {
         email,
         phoneNumber,
         gender,
-        password,
+        password: updatedHashedPassword,
         profile: {
           update: {
             bio,
             website,
             picture: {
               upsert: {
-                create: profilePicture
-                  ? {
-                      url: profilePicture.url,
-                      publicId: profilePicture.publicId,
-                    }
-                  : undefined,
-                update: profilePicture
-                  ? {
-                      url: profilePicture.url,
-                      publicId: profilePicture.publicId,
-                    }
-                  : undefined,
+                create: profilePicture ? updatedProfilePicture : undefined,
+                update: profilePicture ? updatedProfilePicture : undefined,
               },
             },
           },

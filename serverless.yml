@@ -1,0 +1,69 @@
+org: ezeikel
+app: cuurly-api
+service: cuurly-apollo-lambda
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-2
+  environment:
+    FRONTEND_URL: 'https://cuurly.co'
+    DATABASE_URL: ${ssm:/cuurly/keys/mongodb}
+    SENTRY_DSN: ${ssm:/cuurly/keys/sentry}
+    APP_SECRET: ${ssm:/cuurly/keys/app-secret}
+    MAIL_HOST: 'smtp.postmarkapp.com'
+    MAIL_PORT: 2525
+    MAIL_USER: ${ssm:/cuurly/keys/postmark}
+    MAIL_PASS: ${ssm:/cuurly/keys/postmark}
+    CLOUDINARY_KEY: ${ssm:/cuurly/keys/cloudinary/key}
+    CLOUDINARY_SECRET: ${ssm:/cuurly/keys/cloudinary/secret}
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
+
+plugins:
+  - serverless-webpack
+  - serverless-webpack-prisma
+  - serverless-offline-variables
+  - serverless-offline
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: api.cuurly.co
+    basePath: graphql
+    createRoute53Record: true
+  serverless-offline:
+    printOutput: true
+    prefix: graphql
+    httpPort: 7000
+  webpack:
+    webpackConfig: 'webpack.config.js' # Name of webpack configuration file
+    includeModules: true # Node modules configuration for packaging
+    packager: 'yarn' # Packager that will be used to package your external modules
+    excludeFiles: src/**/*.test.js # Provide a glob for files to ignore
+
+functions:
+  graphql:
+    handler: src/handlers/graphql.handler
+    events:
+      - http:
+          path: /
+          method: post
+          cors:
+            origin: https://www.cuurly.co
+            headers:
+              - Authorization
+              - Content-Type
+            allowCredentials: true
+      - http:
+          path: /
+          method: get
+          cors:
+            origin: https://www.cuurly.co
+            headers:
+              - Authorization
+              - Content-Type
+            allowCredentials: true

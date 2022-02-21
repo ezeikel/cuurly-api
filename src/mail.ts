@@ -1,16 +1,15 @@
 import nodemailer from 'nodemailer';
 
-// TODO: Not sure why process.env values dont seem to be  set inside of this function
 export const transport = nodemailer.createTransport({
-  host: process.env.MAIL_HOST || 'smtp.mailtrap.io',
-  port: process.env.MAIL_PORT || 2525,
+  host: process.env.MAIL_HOST,
+  port: Number(process.env.MAIL_PORT) || 0,
   auth: {
-    user: process.env.MAIL_USER || 'ab8fae85ac4f38',
-    pass: process.env.MAIL_PASS || 'f56c575e4020c4',
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
   },
 });
 
-export const makeNiceEmail = text => `
+export const makeNiceEmail = (text: string): string => `
   <div className="email style="
     border: 1px solid black;
     padding: 20px;
@@ -18,8 +17,8 @@ export const makeNiceEmail = text => `
     line-height: 2;
     font-size: 20px;
   ">
-    <h2>Crownd</h2>
+    <h2>Hello there!</h2>
     <p>${text}</p>
-    <p>Crownd Team</p>
+    <p>Cuurly Team</p>
   </div>
 `;

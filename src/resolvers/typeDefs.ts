@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-express';
+import { gql } from 'apollo-server-lambda';
 
 const typeDefs = gql`
   scalar Date
@@ -51,6 +51,7 @@ const typeDefs = gql`
     following: [User!]!
     followers: [User!]!
     verified: Boolean!
+    gravatar: String
     posts: [Post!]!
     likes: [Like!]!
     comments: [Comment!]!
