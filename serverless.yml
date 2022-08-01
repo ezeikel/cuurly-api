@@ -8,6 +8,7 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: eu-west-2
+  profile: ezeikel-admin
   environment:
     FRONTEND_URL: ${param:frontend-url, 'http://localhost:3000'}
     DATABASE_URL: ${param:database-url}
@@ -27,7 +28,7 @@ params:
   prod:
     frontend-url: 'https://cuurly.co'
     domain: 'api.cuurly.co'
-  stage:
+  staging:
     frontend-url: 'https://staging.cuurly.co'
     domain: 'staging.api.cuurly.co'
   dev:
@@ -44,7 +45,6 @@ plugins:
 custom:
   customDomain:
     domainName: ${param:domain}
-    stage: ${sls.stage}
     basePath: graphql
     createRoute53Record: true
   serverless-offline:
