@@ -36,7 +36,7 @@
     ]
   },
   "dependencies": {
-    "@prisma/client": "^3.9.2",
+    "@prisma/client": "^4.1.0",
     "@sentry/serverless": "^6.17.9",
     "apollo-server-lambda": "^3.10.0",
     "bcryptjs": "^2.4.3",
@@ -88,7 +88,7 @@
     "jest-watch-typeahead": "1.0.0",
     "lint-staged": "12.3.4",
     "prettier": "2.7.1",
-    "prisma": "3.9.2",
+    "prisma": "^4.1.0",
     "serverless-domain-manager": "6.0.3",
     "serverless-offline": "8.5.0",
     "serverless-offline-variables": "0.1.0",

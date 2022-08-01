@@ -20,6 +20,12 @@ const typeDefs = gql`
     message: String
   }
 
+  type Profile {
+    bio: String!
+    website: String
+    picture: Media
+  }
+
   type Like {
     id: ID!
     user: User!
@@ -42,7 +48,7 @@ const typeDefs = gql`
     firstName: String!
     lastName: String!
     username: String!
-    profilePicture: Media
+    profile: Profile!
     website: String
     bio: String
     email: String!

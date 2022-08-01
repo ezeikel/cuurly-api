@@ -110,6 +110,7 @@ const Mutations = {
         email: lowercaseEmail,
         username: lowercaseUsername,
         password: hashedPassword,
+        profile: {}, // TODO: is there a better way to do this?
       },
     });
     // create JWT token for user
@@ -133,6 +134,7 @@ const Mutations = {
         username,
       },
     });
+
     if (!user) {
       throw new Error(
         "username: Hmm, we couldn't find that username in our records. Try again.",
@@ -339,7 +341,7 @@ const Mutations = {
         },
         media: {
           // TODO: should be an array of media
-          create: {
+          set: {
             type: fileType,
             url,
             publicId,
@@ -507,10 +509,7 @@ const Mutations = {
             bio,
             website,
             picture: {
-              upsert: {
-                create: profilePicture ? updatedProfilePicture : undefined,
-                update: profilePicture ? updatedProfilePicture : undefined,
-              },
+              set: profilePicture ? updatedProfilePicture : undefined,
             },
           },
         },

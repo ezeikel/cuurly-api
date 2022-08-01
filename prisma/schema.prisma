@@ -1,7 +1,6 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongoDb"]
-  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
@@ -26,35 +25,35 @@ enum MediaType {
   VIDEO
 }
 
-model Media {
-  id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  type      MediaType @default(IMAGE)
-  url       String
-  publicId  String
-  post      Post?     @relation(fields: [postId], references: [id])
-  postId    String?   @db.ObjectId
-  profile   Profile?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+type Media {
+  type     MediaType @default(IMAGE)
+  url      String
+  publicId String
+}
 
-  @@map("media")
+type Profile {
+  bio       String  @default("")
+  website   String?
+  picture   Media?
+  pictureId String? @db.ObjectId
 }
 
 model Comment {
-  id        String   @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   text      String
-  writtenBy User     @relation(fields: [userId], references: [id])
-  userId    String   @db.ObjectId
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    String   @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  writtenBy User      @relation(fields: [userId], references: [id])
+  userId    String    @db.ObjectId
+  post      Post      @relation(fields: [postId], references: [id])
+  postId    String    @db.ObjectId
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("comments")
 }
 
 model Like {
-  id        String   @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
   userId    String   @db.ObjectId
   post      Post     @relation(fields: [postId], references: [id])
@@ -66,7 +65,7 @@ model Like {
 }
 
 model Post {
-  id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   caption   String?
   media     Media[]
   published Boolean   @default(false)
@@ -75,6 +74,7 @@ model Post {
   authorId  String    @db.ObjectId
   likes     Like[]
   comments  Comment[]
+  deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -82,18 +82,18 @@ model Post {
 }
 
 model User {
-  id               String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
   firstName        String
   lastName         String
   email            String    @unique
   username         String    @unique
   password         String
   role             Role?     @default(USER)
-  profile          Profile?
-  followers        User[]    @relation("UserFollows", fields: [followerIds])
-  followerIds      String[]  @db.Array(ObjectId)
-  following        User[]    @relation("UserFollows", fields: [followingIds])
-  followingIds     String[]  @db.Array(ObjectId)
+  profile          Profile
+  followers        User[]    @relation("UserFollows", fields: [followerIds], references: [id])
+  followerIds      String[]  @db.ObjectId
+  following        User[]    @relation("UserFollows", fields: [followingIds], references: [id])
+  followingIds     String[]  @db.ObjectId
   gender           Gender    @default(value: NOTSPECIFIED)
   phoneNumber      String?
   resetToken       String?
@@ -101,19 +101,10 @@ model User {
   posts            Post[]
   likes            Like[]
   comments         Comment[]
+  verified         Boolean   @default(value: false)
+  deletedAt        DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
   @@map("users")
-}
-
-model Profile {
-  id        String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  bio       String?
-  picture   Media   @relation(fields: [pictureId], references: [id])
-  pictureId String  @unique @db.ObjectId
-  user      User    @relation(fields: [userId], references: [id])
-  userId    String  @unique @db.ObjectId
-  website   String?
-  verified  Boolean @default(value: false)
 }

@@ -51,22 +51,25 @@ const Query = {
       },
     });
   },
-  users: (parent: any, { query }: UsersArgs, context: Context) => {
-    isLoggedIn(context.user?.id);
-    let filter = {};
+  users: async (
+    parent: any,
+    { query }: UsersArgs,
+    { user, prisma }: Context,
+  ) => {
+    isLoggedIn(user?.id);
 
-    if (query) {
-      filter = {
-        // just filtering on username for now until OR is added back for mongo connector - https://github.com/prisma/prisma/issues/3897
-        where: {
-          username: {
-            contains: query,
-          },
-        },
-      };
-    }
+    const users = await prisma.user.findMany({
+      where: query
+        ? {
+            // just filtering on username for now until OR is added back for mongo connector - https://github.com/prisma/prisma/issues/3897
+            username: {
+              contains: query,
+            },
+          }
+        : undefined,
+    });
 
-    return context.prisma.user.findMany(filter);
+    return users;
   },
   user: (parent: any, { id, username, email }: UserArgs, context: Context) =>
     context.prisma.user.findUnique({ where: { id, username, email } }),
