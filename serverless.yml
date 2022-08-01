@@ -9,19 +9,30 @@ provider:
   runtime: nodejs14.x
   region: eu-west-2
   environment:
-    FRONTEND_URL: 'https://cuurly.co'
-    DATABASE_URL: ${ssm:/cuurly/keys/mongodb}
-    SENTRY_DSN: ${ssm:/cuurly/keys/sentry}
-    APP_SECRET: ${ssm:/cuurly/keys/app-secret}
-    MAIL_HOST: 'smtp.postmarkapp.com'
+    FRONTEND_URL: ${param:frontend-url, 'http://localhost:3000'}
+    DATABASE_URL: ${param:database-url}
+    SENTRY_DSN: ${param:sentry-dsn}
+    APP_SECRET: ${param:app-secret}
+    MAIL_HOST: ${param:mail-host}
     MAIL_PORT: 2525
-    MAIL_USER: ${ssm:/cuurly/keys/postmark}
-    MAIL_PASS: ${ssm:/cuurly/keys/postmark}
-    CLOUDINARY_KEY: ${ssm:/cuurly/keys/cloudinary/key}
-    CLOUDINARY_SECRET: ${ssm:/cuurly/keys/cloudinary/secret}
+    MAIL_USER: ${param:mail-user}
+    MAIL_PASS: ${param:mail-pass}
+    CLOUDINARY_KEY: ${param:cloudinary-key}
+    CLOUDINARY_SECRET: ${param:cloudinary-secret}
   apiGateway:
     binaryMediaTypes:
       - '*/*'
+
+params:
+  prod:
+    frontend-url: 'https://cuurly.co'
+    domain: 'api.cuurly.co'
+  stage:
+    frontend-url: 'https://staging.cuurly.co'
+    domain: 'staging.api.cuurly.co'
+  dev:
+    frontend-url: 'https://develop.cuurly.co'
+    domain: 'develop.api.cuurly.co'
 
 plugins:
   - serverless-webpack
@@ -32,7 +43,8 @@ plugins:
 
 custom:
   customDomain:
-    domainName: api.cuurly.co
+    domainName: ${param:domain}
+    stage: ${sls.stage}
     basePath: graphql
     createRoute53Record: true
   serverless-offline:
