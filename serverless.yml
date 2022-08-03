@@ -8,7 +8,6 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: eu-west-2
-  profile: ezeikel-admin
   environment:
     FRONTEND_URL: ${param:frontend-url, 'http://localhost:3000'}
     DATABASE_URL: ${param:database-url}
@@ -20,9 +19,10 @@ provider:
     MAIL_PASS: ${param:mail-pass}
     CLOUDINARY_KEY: ${param:cloudinary-key}
     CLOUDINARY_SECRET: ${param:cloudinary-secret}
-  apiGateway:
-    binaryMediaTypes:
-      - '*/*'
+  # https://github.com/serverless/serverless/issues/7243
+  # apiGateway:
+  #   binaryMediaTypes:
+  #     - '*/*'
 
 params:
   prod:
@@ -41,6 +41,7 @@ plugins:
   - serverless-offline-variables
   - serverless-offline
   - serverless-domain-manager
+  # - serverless-binary-cors
 
 custom:
   customDomain:
@@ -65,7 +66,9 @@ functions:
           path: /
           method: post
           cors:
-            origin: https://www.cuurly.co
+            origins:
+              - https://*.cuurly.co
+              - https://studio.apollographql.com
             headers:
               - Authorization
               - Content-Type
@@ -74,7 +77,9 @@ functions:
           path: /
           method: get
           cors:
-            origin: https://www.cuurly.co
+            origins:
+              - https://*.cuurly.co
+              - https://studio.apollographql.com
             headers:
               - Authorization
               - Content-Type
