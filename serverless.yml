@@ -19,10 +19,9 @@ provider:
     MAIL_PASS: ${param:mail-pass}
     CLOUDINARY_KEY: ${param:cloudinary-key}
     CLOUDINARY_SECRET: ${param:cloudinary-secret}
-  # https://github.com/serverless/serverless/issues/7243
-  # apiGateway:
-  #   binaryMediaTypes:
-  #     - '*/*'
+  apiGateway:
+    binaryMediaTypes:
+      - 'multipart/form-data'
 
 params:
   prod:
@@ -41,7 +40,6 @@ plugins:
   - serverless-offline-variables
   - serverless-offline
   - serverless-domain-manager
-  # - serverless-binary-cors
 
 custom:
   customDomain:

@@ -29,7 +29,7 @@ const processFile = async ({
       break;
   }
 
-  const folder = `users/${userId}/uploads/${fileType}s`;
+  const folder = `users/${userId}/uploads/${fileType.toLowerCase()}s`;
 
   const { resultSecureUrl, publicId } = await processUpload({
     file: { createReadStream, fileType },

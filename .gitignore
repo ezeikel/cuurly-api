@@ -1,8 +1,11 @@
-node_modules
-dist
+node_modules/
+dist/
 coverage
 .serverless
 .build
 .webpack
 .webpackCache
 .env
+.vscode
+process.defaults.js
+.DS_store

@@ -50,7 +50,6 @@
     "md5": "^2.3.0",
     "nodemailer": "^6.7.7",
     "path": "^0.12.7",
-    "serverless-binary-cors": "^0.0.1",
     "stripe": "^10.0.0",
     "util": "^0.12.4"
   },

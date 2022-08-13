@@ -19,7 +19,6 @@ const processUpload = async ({
   tags: string[];
 }) => {
   const { createReadStream, fileType } = file;
-
   const readableStream = createReadStream();
 
   let resultUrl = '';
@@ -30,8 +29,9 @@ const processUpload = async ({
   const cloudinaryUpload = async ({ stream }: { stream: any }) => {
     // TODO: proper conditioning needed here
     const uploadConfig =
-      fileType === 'image'
+      fileType === 'IMAGE'
         ? {
+            resource_type: 'auto',
             folder,
             tags,
             overwrite: true,
@@ -59,6 +59,7 @@ const processUpload = async ({
               publicId = result.public_id;
               resolve({ resultSecureUrl, publicId });
             } else {
+              console.error({ error });
               reject(error);
             }
           },
@@ -67,6 +68,7 @@ const processUpload = async ({
         stream.pipe(streamLoad);
       });
     } catch (err) {
+      console.error({ err });
       throw new Error(`Failed to upload file! Err:${err.message}`);
     }
   };

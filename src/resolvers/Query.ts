@@ -89,6 +89,7 @@ const Query = {
     context.prisma.user
       .findUnique({ where: { id, username, email } })
       .followers(),
+  // TODO: this should be prisma.post
   posts: (parent: any, args: any, context: Context) =>
     context.prisma.user.findMany(),
   post: (parent: any, { id }: PostArgs, context: Context) =>
