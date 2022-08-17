@@ -1,9 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient({
-  log: ['query'],
-});
+import prisma from './lib/prisma';
 
 export type Context = {
   prisma: PrismaClient;

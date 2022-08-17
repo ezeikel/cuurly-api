@@ -26,6 +26,7 @@ const Custom = {
       const hash = md5(parent.email);
       return `https://gravatar.com/avatar/${hash}?s=200`;
     },
+    name: (parent: any) => `${parent.firstName} ${parent.lastName}`,
   },
   // User: {
   //   posts: (parent, {}, { prisma }) =>

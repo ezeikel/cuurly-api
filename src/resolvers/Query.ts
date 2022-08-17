@@ -71,8 +71,47 @@ const Query = {
 
     return users;
   },
-  user: (parent: any, { id, username, email }: UserArgs, context: Context) =>
-    context.prisma.user.findUnique({ where: { id, username, email } }),
+  user: (parent: any, { id, username, email }: UserArgs, { prisma }: Context) =>
+    prisma.user.findUnique({
+      where: { id, username, email },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        username: true,
+        role: true,
+        gender: true,
+        phoneNumber: true,
+        verified: true,
+        profile: {
+          select: {
+            bio: true,
+            website: true,
+            picture: {
+              select: {
+                url: true,
+              },
+            },
+          },
+        },
+        followers: {
+          select: {
+            id: true,
+          },
+        },
+        following: {
+          select: {
+            id: true,
+          },
+        },
+        posts: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    }),
   following: (
     parent: any,
     { id, username, email }: FollowingArgs,
@@ -90,23 +129,176 @@ const Query = {
       .findUnique({ where: { id, username, email } })
       .followers(),
   // TODO: this should be prisma.post
-  posts: (parent: any, args: any, context: Context) =>
-    context.prisma.user.findMany(),
-  post: (parent: any, { id }: PostArgs, context: Context) =>
-    context.prisma.post.findUnique({ where: { id } }),
+  posts: (parent: any, args: any, { user, prisma }: Context) =>
+    prisma.post.findMany({
+      where: {
+        author: {
+          id: user.id,
+        },
+        deletedAt: {
+          isSet: false,
+        },
+      },
+    }),
+  post: (parent: any, { id }: PostArgs, { prisma }: Context) =>
+    prisma.post.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        caption: true,
+        published: true,
+        archived: true,
+        createdAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            verified: true,
+            followers: {
+              select: {
+                id: true,
+              },
+            },
+            following: {
+              select: {
+                id: true,
+              },
+            },
+            profile: {
+              select: {
+                picture: {
+                  select: {
+                    url: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        media: {
+          select: {
+            type: true,
+            url: true,
+            publicId: true,
+          },
+        },
+        likes: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          where: {
+            deletedAt: {
+              isSet: false,
+            },
+          },
+          select: {
+            id: true,
+            text: true,
+            createdAt: true,
+            writtenBy: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    }),
   feed: async (
     parent: any,
     { id }: FeedArgs,
     { prisma, user: { id: userId } }: Context,
   ) => {
-    const following = await prisma.user
+    const followedUsers = await prisma.user
       .findUnique({ where: { id } })
       .following();
-    const followingIds = following.map(follower => follower.id);
+    const followedUserIds = followedUsers.map(user => user.id);
 
     return prisma.post.findMany({
       where: {
-        author: { is: { id: { in: [...followingIds, userId] } } },
+        // return posts of followed users plus posts of current user
+        author: { is: { id: { in: [...followedUserIds, userId] } } },
+        deletedAt: { isSet: false },
+        published: true,
+        archived: false,
+      },
+      select: {
+        id: true,
+        caption: true,
+        published: true,
+        archived: true,
+        createdAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            verified: true,
+            followers: {
+              select: {
+                id: true,
+              },
+            },
+            following: {
+              select: {
+                id: true,
+              },
+            },
+            profile: {
+              select: {
+                picture: {
+                  select: {
+                    url: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        media: {
+          select: {
+            type: true,
+            url: true,
+            publicId: true,
+          },
+        },
+        likes: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          where: {
+            deletedAt: {
+              isSet: false,
+            },
+          },
+          select: {
+            id: true,
+            text: true,
+            createdAt: true,
+            writtenBy: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',

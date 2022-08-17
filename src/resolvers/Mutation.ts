@@ -339,6 +339,7 @@ const Mutations = {
             id: userId,
           },
         },
+        published: true,
         media: {
           // TODO: should be an array of media
           set: {

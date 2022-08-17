@@ -47,6 +47,7 @@ const typeDefs = gql`
     id: ID!
     firstName: String!
     lastName: String!
+    name: String!
     username: String!
     profile: Profile!
     website: String
@@ -69,10 +70,10 @@ const typeDefs = gql`
   type Post {
     id: ID!
     caption: String
-    media: [Media!]!
-    author: User!
-    likes: [Like!]!
-    comments: [Comment!]!
+    media: [Media!]
+    author: User
+    likes: [Like!]
+    comments: [Comment!]
     createdAt: Date!
     updatedAt: Date!
   }
